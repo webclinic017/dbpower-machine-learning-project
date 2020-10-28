@@ -6,7 +6,7 @@ import os as os
 class Common:
     def __init__(self):
         return self
-    
+
 def percentB_belowzero(percentB, price):
     signal   = []
     previous = -1.0
