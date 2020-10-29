@@ -20,6 +20,7 @@ def chart():
     files_name = None
     for root, dirs, files in walk(path_chart):
         files_name = files
+    files_name.sort(reverse=False)
     return render_template('./chart.html', files_name=files_name)
 
 
