@@ -18,18 +18,26 @@ def index():
 def data():
     file_1 = os.path.abspath(os.path.join('data', 'nq', 'nq-clean-data-with-features.csv'))
     df1 = pd.read_csv(file_1)
-    print(df1)
     df1 = df1.tail(200).round(1)
     return render_template('./data.html', data=df1.to_html(classes='table table-sm table-striped'))
 
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
-    path_chart = os.path.join(static_folder, 'img-nq')
+    path_chart = os.path.join(static_folder, 'img-nq', 'features')
     files_name = None
     for root, dirs, files in walk(path_chart):
         files_name = files
     files_name.sort(reverse=False)
     return render_template('./chart.html', files_name=files_name)
+
+@app.route('/result', methods=['GET', 'POST'])
+def result():
+    path_chart = os.path.join(static_folder, 'img-nq', 'results')
+    files_name = None
+    for root, dirs, files in walk(path_chart):
+        files_name = files
+    files_name.sort(reverse=False)
+    return render_template('./result.html', files_name=files_name)
 
 
 if __name__ == '__main__':
