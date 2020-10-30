@@ -39,6 +39,9 @@ def result():
     files_name.sort(reverse=False)
     return render_template('./result.html', files_name=files_name)
 
+@app.route('/markdown', methods=['GET', 'POST'])
+def markdown():
+    return render_template('./markdown.html')
 
 if __name__ == '__main__':
     app.debug = True
