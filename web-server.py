@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from os import listdir, walk
 from os.path import isfile, join
+import pandas as pd
 import warnings
 import os
 template_dir = os.path.join(os.path.abspath('data'), 'templates')
@@ -13,6 +14,13 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 def index():
     return render_template('./index.html')
 
+@app.route('/data', methods=['GET', 'POST'])
+def data():
+    file_1 = os.path.abspath(os.path.join('data', 'nq', 'nq-clean-data-with-features.csv'))
+    df1 = pd.read_csv(file_1)
+    print(df1)
+    df1 = df1.tail(200).round(1)
+    return render_template('./data.html', data=df1.to_html(classes='table table-sm table-striped'))
 
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
