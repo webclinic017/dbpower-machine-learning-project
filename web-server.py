@@ -18,7 +18,7 @@ def index():
 def data():
     file_1 = os.path.abspath(os.path.join('data', 'nq', 'nq-clean-data-with-features.csv'))
     df1 = pd.read_csv(file_1)
-    df1 = df1.tail(200).round(1)
+    df1 = df1.tail(200)
     return render_template('./data.html', data=df1.to_html(classes='table table-sm table-striped'))
 
 @app.route('/chart', methods=['GET', 'POST'])
