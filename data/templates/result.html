@@ -1,0 +1,30 @@
+<html>
+<head>{% include 'header.html' %}</head>
+<script>
+var ui = {};
+function initUI() {}
+$(document).ready(function() {
+  initUI();
+});
+</script>
+<style>
+.container-body {min-width: 1140px; margin-top: 24px; font-size: 12px;}
+.container-body img {width: 100%;}
+</style>
+<body>
+{% include 'navbar.html' %}
+<div class="container container-body">
+    
+<div class="row">
+{% for file in files_name %}
+  <div class="col-3 col-sm-3">
+    {{ file }}
+    <img src="./img-nq/results/{{ file }}">
+    <br /><br />
+  </div>
+{% endfor %}
+</div>
+    
+</div>
+</body>
+<html>
