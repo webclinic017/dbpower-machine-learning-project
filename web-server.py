@@ -37,7 +37,16 @@ def result():
     for root, dirs, files in walk(path_chart):
         files_name = files
     files_name.sort(reverse=False)
-    return render_template('./result.html', files_name=files_name)
+    return render_template('./result.html', files_name=files_name[-32:])
+
+@app.route('/prediction', methods=['GET', 'POST'])
+def prediction():
+    file_2 = os.path.abspath(os.path.join('data', 'nq', 'nq-prediction.csv'))
+    df2 = pd.read_csv(file_2)
+    df2['predict_preice_pct'] = df2['predict_preice_pct'].round(5)*100
+    df2['real_price_pct'] = df2['real_price_pct'].round(5)*100
+    df2['predict_price'] = df2['predict_price'].round(2)
+    return render_template('./data.html', data=df2.to_html(classes='table table-sm table-striped'))
 
 @app.route('/markdown', methods=['GET', 'POST'])
 def markdown():
