@@ -5,7 +5,7 @@ import pandas as pd
 import warnings
 import os
 template_dir = os.path.join(os.path.abspath('data'), 'templates')
-static_folder = os.path.abspath('data')
+static_folder = os.path.join(os.path.abspath('data'))
 app = Flask(__name__, template_folder=template_dir, static_url_path='', static_folder=static_folder)
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -42,7 +42,7 @@ def result():
 @app.route('/prediction', methods=['GET', 'POST'])
 def prediction():
     file_2 = os.path.abspath(os.path.join('data', 'nq', 'nq-prediction.csv'))
-    df2 = pd.read_csv(file_2)
+    df2 = pd.read_csv(file_2).tail(60*8)
     df2['predict_preice_pct'] = df2['predict_preice_pct'].round(5)*100
     df2['close_price_pct'] = df2['close_price_pct'].round(5)*100
     df2['predict_price'] = df2['predict_price'].round(2)

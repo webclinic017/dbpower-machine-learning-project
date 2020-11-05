@@ -2,6 +2,7 @@ import sqlite3 as sqlite3
 import pandas as pd
 import numpy as np
 import os as os
+import talib as talib
 
 class Common:
     def __init__(self):
@@ -19,7 +20,6 @@ def percentB_belowzero(percentB, price):
     return signal
 
 def percentB_aboveone(percentB, price):
-    import numpy as np
     signal   = []
     previous = 2
     for date,value in percentB.iteritems():
@@ -29,3 +29,8 @@ def percentB_aboveone(percentB, price):
             signal.append(np.nan)
         previous = value
     return signal
+
+def kdj(high, low, close, fastk_period, slowk_period, slowk_matype ,slowd_period ,slowd_matype):
+    slowk, slowd = talib.STOCH(high, low, close, fastk_period, slowk_period, slowk_matype, slowd_period ,slowd_matype)
+    slowj = list(map(lambda x,y: 3 * x - 2 * y, slowk, slowd))
+    return slowk, slowd, slowj
