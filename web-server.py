@@ -16,7 +16,7 @@ def index():
 
 @app.route('/data', methods=['GET', 'POST'])
 def data():
-    file_1 = os.path.abspath(os.path.join('data', 'nq', 'nq-clean-data-with-features.csv'))
+    file_1 = os.path.abspath(os.path.join('data', 'nq', 'clean-data', 'nq-clean-data-with-features.csv'))
     df1 = pd.read_csv(file_1)
     df1 = df1.tail(600)
     return render_template('./data.html', data=df1.to_html(classes='table table-sm table-striped'))
@@ -41,10 +41,8 @@ def result():
 
 @app.route('/prediction', methods=['GET', 'POST'])
 def prediction():
-    file_2 = os.path.abspath(os.path.join('data', 'nq', 'nq-prediction.csv'))
-    df2 = pd.read_csv(file_2).tail(60*8)
-    #df2['predict_close_pct'] = df2['predict_close_pct'].round(5)*100
-    #df2['real_close_pct'] = df2['real_close_pct'].round(5)*100
+    file_2 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'nq-prediction.csv'))
+    df2 = pd.read_csv(file_2).tail(40*8)
     df2['predict_close'] = df2['predict_close'].round(2)
     return render_template('./data.html', data=df2.to_html(classes='table table-sm table-striped'))
 
