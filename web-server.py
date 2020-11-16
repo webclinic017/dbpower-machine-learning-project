@@ -43,7 +43,11 @@ def result():
 def prediction():
     file_2 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'nq-prediction.csv'))
     df2 = pd.read_csv(file_2).tail(40*8)
-    df2['predict_close'] = df2['predict_close'].round(2)
+    df2['t1'] = df2['t1'].round(2)
+    df2['t2'] = df2['t2'].round(2)
+    df2['t3'] = df2['t3'].round(2)
+    df2['t4'] = df2['t4'].round(2)
+    df2['t5'] = df2['t5'].round(2)
     return render_template('./data.html', data=df2.to_html(classes='table table-sm table-striped'))
 
 @app.route('/markdown', methods=['GET', 'POST'])
