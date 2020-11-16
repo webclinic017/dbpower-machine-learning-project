@@ -12,18 +12,18 @@ $(document).ready(function() {
 </style>
 <body>
 {% include 'navbar.html' %}
-<div class="container container-body">
+<div class="container">
     
-<div class="row">
+<div class="row body-container">
 {% for file in files_name %}
-  <div class="col-4 col-sm-4">
+  <div class="col-6 col-sm-4">
     {{ file }}
     <img src="./img-nq/features/{{ file }}">
     <br /><br />
   </div>
 {% endfor %}
 </div>
-    
+
 </div>
 </body>
 <html>

@@ -11,10 +11,25 @@ $(document).ready(function() {
 </style>
 <body>
 {% include 'navbar.html' %}
-<div class="container container-body">
+<div class="container">
 
 <div class="row">
 <div class="col-sm-12">
+<div class="body-container">
+
+<h5>Model</h5>
+window size = 40<br />
+predict = t +5mins<br /><br />
+
+<h5>Features</h5>
+1. bollinger & %b<br />
+2. p-sar<br />
+3. vwap (40 & 120)<br />
+4. kdj (kd-diff & j)<br />
+5. macd (hist)<br />
+6. sma (40 & 120)<br />
+    
+<hr />
 <h5>Scope</h5>
 To develop NQ LSTM machine learning tool that will be used to predict NQ(E-mini Nasdaq-100 futures) trend of coming 5 minutes.<br /><br />
     
@@ -37,6 +52,7 @@ LSTM Model Build up: 23/10 – 29/10<br />
 Data Preparation: 30/10<br />
 Feature Selection and performance tuning: 2/11 – 4/11<br />
 Back test: 5/11<br /><br />
+</div>
 </div>
 </div>
 

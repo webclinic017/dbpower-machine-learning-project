@@ -1,0 +1,6 @@
+/*.container-body {min-width: 1140px; margin-top: 12px; padding-top: 12px; font-size: 12px;}
+nav a.dropdown-item {padding: 0.1rem 1.5rem;}
+nav a.dropdown-item:active {background-color: #f8f9fa; color: #212529;}
+nav {border-bottom: 1px solid #dcdcdc;}*/
+
+table, .dataframe {font-size: 10px; border: none;}

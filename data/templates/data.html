@@ -12,11 +12,13 @@ $(document).ready(function() {
 </style>
 <body>
 {% include 'navbar.html' %}
-<div class="container-fluid container-body">
+<div class="container">
     
 <div class="row">
 <div class="col-12 col-sm-12">
+<div class="body-container">
   {{ data | safe }}
+</div>
 </div>
 </div>
     
