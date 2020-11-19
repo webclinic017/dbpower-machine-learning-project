@@ -18,8 +18,9 @@ def index():
 def data():
     file_1 = os.path.abspath(os.path.join('data', 'nq', 'clean-data', 'nq-clean-data-with-features.csv'))
     df1 = pd.read_csv(file_1)
-    df1 = df1.tail(600)
-    return render_template('./data.html', data=df1.to_html(classes='table table-sm table-striped'))
+    df1.drop(['udate'], axis=1, inplace=True)
+    df1 = df1.tail(100)
+    return render_template('./data.html', data=df1.to_html(classes='table table-sm table-striped').replace('border="1"','border="0"'))
 
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
@@ -48,7 +49,7 @@ def prediction():
     df2['t3'] = df2['t3'].round(2)
     df2['t4'] = df2['t4'].round(2)
     df2['t5'] = df2['t5'].round(2)
-    return render_template('./data.html', data=df2.to_html(classes='table table-sm table-striped'))
+    return render_template('./data.html', data=df2.to_html(classes='table table-sm table-striped').replace('border="1"','border="0"'))
 
 @app.route('/markdown', methods=['GET', 'POST'])
 def markdown():
