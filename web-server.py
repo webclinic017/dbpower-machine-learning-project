@@ -44,16 +44,15 @@ def result():
 def prediction():
     file_2 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'nq-prediction.csv'))
     df2 = pd.read_csv(file_2).tail(40*8)
-    df2['t1'] = df2['t1'].round(2)
-    df2['t2'] = df2['t2'].round(2)
-    df2['t3'] = df2['t3'].round(2)
-    df2['t4'] = df2['t4'].round(2)
-    df2['t5'] = df2['t5'].round(2)
-    return render_template('./data.html', data=df2.to_html(classes='table table-sm table-striped').replace('border="1"','border="0"'))
+    return render_template('./prediction.html', data=df2.to_html(classes='table table-sm table-striped').replace('border="1"','border="0"'))
 
 @app.route('/markdown', methods=['GET', 'POST'])
 def markdown():
     return render_template('./markdown.html')
+
+@app.route('/install', methods=['GET', 'POST'])
+def install():
+    return render_template('./install.html')
 
 if __name__ == '__main__':
     app.debug = True
