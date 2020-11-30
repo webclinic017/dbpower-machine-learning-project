@@ -20,7 +20,7 @@ def data():
     df1 = pd.read_csv(file_1)
     df1.drop(['udate'], axis=1, inplace=True)
     df1 = df1.tail(100)
-    return render_template('./data.html', data=df1.to_html(classes='table table-sm table-striped').replace('border="1"','border="0"'))
+    return render_template('./data.html', data=df1.to_html(classes='table table-sm table-striped', index=False).replace('border="1"','border="0"'))
 
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
@@ -40,11 +40,23 @@ def result():
     files_name.sort(reverse=False)
     return render_template('./result.html', files_name=files_name[-32:])
 
+@app.route('/result-describe', methods=['GET', 'POST'])
+def result_describe():
+    path_describe = os.path.join(static_folder, 'nq', 'result-describe')
+    data = {}
+    for root, dirs, files in walk(path_describe):
+        files.sort(reverse=True)
+        for path_file in files:
+            path_file2 = path_file.replace('.csv', '')
+            df1 = pd.read_csv(root+'/'+path_file).round(3)
+            data[path_file2] = df1.to_html(classes='table table-sm table-striped', index=False).replace('border="1"','border="0"')
+    return render_template('./result-describe.html', data=data)
+
 @app.route('/prediction', methods=['GET', 'POST'])
 def prediction():
     file_2 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'nq-prediction.csv'))
     df2 = pd.read_csv(file_2).tail(40*8)
-    return render_template('./prediction.html', data=df2.to_html(classes='table table-sm table-striped').replace('border="1"','border="0"'))
+    return render_template('./prediction.html', data=df2.to_html(classes='table table-sm table-striped', index=False).replace('border="1"','border="0"'))
 
 @app.route('/markdown', methods=['GET', 'POST'])
 def markdown():
