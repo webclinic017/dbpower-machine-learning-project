@@ -4,7 +4,7 @@ from os.path import isfile, join
 import pandas as pd
 import warnings
 import os
-template_dir = os.path.join(os.path.abspath('data'), 'templates')
+template_dir = os.path.join(os.path.abspath('data'), 'templates', 'dev')
 static_folder = os.path.join(os.path.abspath('data'))
 app = Flask(__name__, template_folder=template_dir, static_url_path='', static_folder=static_folder)
 warnings.simplefilter(action='ignore', category=FutureWarning)
