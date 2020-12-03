@@ -1,6 +1,8 @@
-venv
-.ipynb_checkpoints
-.idea
-/venv/
-/.ipynb_checkpoints/
-/.idea/
+venv/
+.idea/
+.ipynb_checkpoints/
+__pycache__/
+logs/
+min_max_scaler/
+saved_model/
+training_checkpoints/

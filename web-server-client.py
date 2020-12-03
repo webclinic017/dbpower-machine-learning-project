@@ -11,7 +11,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('./index.html')
+    return render_template('./index.html', data='Client')
 
 if __name__ == '__main__':
     app.debug = True

@@ -18,9 +18,27 @@ $(document).ready(function() {
 <div class="body-container">
 
 <h5>Model</h5>
-window size = 40<br />
-predict = t +5mins<br /><br />
+window size = 50<br />
+predict = t +5mins<br />
+learning rate = 0.0005<br />
+echps = 12 <br />
+units = 512 <br />
+batch size = 512<br /><br />
 
+<h5>Features</h5>
+1. %b<br />
+2. %b-high<br />
+3. %b-low<br />
+4. macdhist<br />
+5. rsi<br />
+6. j-kdj<br />
+7. diff-kdj<br />
+8. sma-15<br />
+9. sma-50<br />
+10. sma-100<br />
+11. sma-200<br />
+
+<div style="display: none;">
 <h5>Features</h5>
 1. bollinger & %b<br />
 2. p-sar<br />
@@ -28,6 +46,7 @@ predict = t +5mins<br /><br />
 4. kdj (kd-diff & j)<br />
 5. macd (hist)<br />
 6. sma (40 & 120)<br />
+</div>
     
 <hr />
 <h5>Scope</h5>

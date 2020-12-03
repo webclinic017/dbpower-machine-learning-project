@@ -120,7 +120,8 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PAT
 啟動
 <pre><code class="powershell">sudo jupyter lab --ip=0.0.0.0 --port=80 --allow-root --NotebookApp.iopub_data_rate_limit=1.0e10
 sudo tensorboard --logdir logs/fit/ --port=81 --host=0.0.0.0
-sudo python3 web-server.py</code></pre>
+sudo python3 web-server-dev.py
+sudo python3 web-server-client.py</code></pre>
 
 (可能有用的)依賴庫
 <pre><code class="powershell">sudo apt-get install python3.7-dev 
