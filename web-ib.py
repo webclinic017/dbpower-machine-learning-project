@@ -21,8 +21,10 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r"/", MainHandler),
+            (r"/account-info", AccountInfo),
             (r"/place-order", OrderHandler),
             (r"/list-positions", ListPositions),
+            (r"/list-orders", ListOrders),
         ]
         settings = dict(
             template_path=os.path.join(os.path.abspath('data'), 'templates', 'ib'),
@@ -36,6 +38,19 @@ class Application(tornado.web.Application):
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
+
+
+class AccountInfo(tornado.web.RequestHandler):
+    def get(self):
+        data = [v for v in conn.accountValues() if v.tag == 'NetLiquidationByCurrency' and v.currency == 'BASE'][0]
+        data2 = {
+            'account': data.account,
+            'value': data.value,
+            'tag': data.tag,
+            'currency': data.currency,
+            'modelCode': data.modelCode
+        }
+        self.write(json.dumps(data2))
 
 
 class OrderHandler(tornado.web.RequestHandler):
@@ -59,6 +74,21 @@ class ListPositions(tornado.web.RequestHandler):
                              'currency': pos.contract.currency},
                 'position': pos.position,
                 'avgCost': pos.avgCost
+            })
+        self.write(json.dumps(data))
+
+
+class ListOrders(tornado.web.RequestHandler):
+    def get(self):
+        data = []
+        for order in conn.orders():
+            data.append({
+                'account': order.account,
+                'permId': order.permId,
+                'refFuturesConId': order.refFuturesConId,
+                'action': order.action,
+                'filledQuantity': order.filledQuantity,
+                'lmtPrice': order.lmtPrice,
             })
         self.write(json.dumps(data))
 

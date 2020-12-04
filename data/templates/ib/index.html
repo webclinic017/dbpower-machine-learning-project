@@ -5,6 +5,31 @@ var ui = {};
 function initUI() {}
 $(document).ready(function() {
   initUI();
+  
+  $.ajax({
+    url: "./account-info",
+    type: "GET",
+    success: function(res) {
+      $('#ac-info').html(res);
+    }
+  });
+  
+  $.ajax({
+    url: "./list-positions",
+    type: "GET",
+    success: function(res) {
+      $('#positions').html(res);
+    }
+  });
+  
+  $.ajax({
+    url: "./list-orders",
+    type: "GET",
+    success: function(res) {
+      $('#orders').html(res);
+    }
+  });
+  
 });
 </script>
 <style>
@@ -16,8 +41,29 @@ $(document).ready(function() {
 <div class="row">
 <div class="col-sm-12">
 <div class="body-container">
+<h6>Account Info</h6>
+<span id='ac-info'></span>
+</div>
+</div>
+</div>
 
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+<h6>Positions</h6>
+<span id='positions'></span>
+</div>
+</div>
+</div>
 
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+<h6>Orders</h6>
+<span id='orders'></span>
+</div>
+</div>
+</div>
 
 </div>
 </body>
