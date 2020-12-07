@@ -19,6 +19,7 @@ cycler==0.10.0
 decorator==4.4.2
 defusedxml==0.6.0
 entrypoints==0.3
+eventkit==0.8.6
 Flask==1.1.2
 gast==0.3.3
 google-auth==1.22.1
@@ -27,6 +28,7 @@ google-pasta==0.2.0
 grpcio==1.32.0
 h5py==2.10.0
 hyperlink==20.0.1
+ib-insync==0.9.64
 idna==2.10
 importlib-metadata==2.0.0
 incremental==17.5.0
@@ -55,7 +57,7 @@ Markdown==3.3
 MarkupSafe==1.1.1
 matplotlib==3.3.2
 mistune==0.8.4
-mpl-finance @ https://github.com/matplotlib/mpl_finance/archive/master.zip
+mpl-finance==0.10.1
 mplfinance==0.12.7a0
 nbclassic==0.2.3
 nbclient==0.5.0
