@@ -1,0 +1,105 @@
+<html>
+<head>{% include 'header.html' %}</head>
+<script>
+var ui = {};
+function initUI() {}
+$(document).ready(function() {
+  initUI();
+  
+  $.ajax({
+    url: "./show-account-info",
+    type: "GET",
+    success: function(res) {
+      $('#ac-info').html(res);
+    }
+  });
+  
+  $.ajax({
+    url: "./list-positions",
+    type: "GET",
+    success: function(res) {
+      $('#positions').html(res);
+    }
+  });
+  
+  $.ajax({
+    url: "./list-orders",
+    type: "GET",
+    success: function(res) {
+      $('#orders').html(res);
+    }
+  });
+  
+  $.ajax({
+    url: "./list-trades",
+    type: "GET",
+    success: function(res) {
+      $('#trades').html(res);
+    }
+  });
+  
+  $.ajax({
+    url: "./list-commission",
+    type: "GET",
+    success: function(res) {
+      $('#commission').html(res);
+    }
+  });
+  
+});
+</script>
+<style>
+body {font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","SimHei", "PMingLiU", "Helvetica", "sans-serif";}
+</style>
+<body>
+{% include 'navbar.html' %}
+<div class="container">
+
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+<h6>Account Info</h6>
+<span id='ac-info'></span>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+<h6>Positions</h6>
+<span id='positions'></span>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+<h6>Orders</h6>
+<span id='orders'></span>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+<h6>Trades</h6>
+<span id='trades'></span>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+<h6>Commission</h6>
+<span id='commission'></span>
+</div>
+</div>
+</div>
+
+</div>
+</body>
+<html>
