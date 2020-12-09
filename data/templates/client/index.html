@@ -2,21 +2,158 @@
 <head>{% include 'header.html' %}</head>
 <script>
 var ui = {};
-function initUI() {}
+function initUI() {
+  ui.tbResult = $('#tb-result');
+  ui.tbResult2 = $('#tb-result2');
+  ui.divResult = $('#tb-result').parent().parent().parent('.row');
+  ui.file = $('#file');
+  ui.tvMinutes = $('#minutes');
+  ui.tvVol = $('#vol');
+  ui.tvVol2 = $('#vol2');
+  ui.tvCutLoss = $('#cutLoss');
+  ui.rDirection = $("input[name='direction']:checked");
+  ui.cbAdjustment = $("#adjustment");
+  ui.btnSubmit = $('#submit');
+}
 $(document).ready(function() {
   initUI();
+  ui.divResult.hide();
+  
+  ui.btnSubmit.click(function() {
+    initUI();
+    ui.tbResult.html('');
+    ui.tbResult2.html('');
+    ui.divResult.hide();
+    
+    var data = {
+      file: ui.file.val(),
+      minutes: ui.tvMinutes.val(),
+      vol: ui.tvVol.val(),
+      vol2: ui.tvVol2.val(),
+      cutLoss: ui.tvCutLoss.val(),
+      direction: ui.rDirection.val(),
+      adjection: ui.cbAdjustment.is(':checked'),
+    };
+
+    $.ajax({
+      url: "./result",
+      type: "POST",
+      data: data,
+      success: function(res) {
+        var obj = JSON.parse(res);
+        ui.tbResult.html(obj.html);
+        
+        function formatColor(val, isFormat) {
+          if (val <= 0 && isFormat)
+            return '<span class="text-danger">'+val+'</span>'
+          else if (val > 0 && isFormat)
+            return '<span class="text-success">'+val+'</span>'
+          else if (!isFormat)
+            return '<span>'+val+'</span>'
+        }
+        var html1 = '';
+        html1 += 'Total Profit:'+formatColor(obj.total_profit, true);
+        html1 += 'Avg Profit:'+formatColor(obj.avg_profit, true);
+        html1 += 'Max Win(单笔):'+formatColor(obj.max_win, true);
+        html1 += 'Max Loss(单笔):'+formatColor(obj.max_loss, true);
+        
+        html1 += 'No.Trade(买卖):'+formatColor(obj.no_trade, false);
+        html1 += 'No.Win:'+formatColor(obj.no_win, false);
+        html1 += 'No.Loss:'+formatColor(obj.no_loss, false);
+        ui.tbResult2.html(html1);
+        ui.divResult.show();
+      }
+    });
+    
+  });
+  
 });
 </script>
 <style>
+#tb-result2 span {font-size: 26px; margin-right: 52px;}
 </style>
 <body>
 {% include 'navbar.html' %}
-<div class="container">
+<div class="container-fluid">
 
 <div class="row">
-<div class="col-sm-12">
+<div class="col-12 col-sm-12">
 <div class="body-container">
-  {{ data | safe }}
+<div class="container">
+  <form>
+  
+    <div class="form-group row">
+      <label for="file" class="col-12 col-sm-2 col-form-label col-form-label-sm">File</label>
+      <div class="col-12 col-sm-10">
+      <input type="text" class="form-control form-control-sm" id="file" placeholder="t5-0608-0922-e10-u512-w50" value="t5-0608-0922-e10-u512-w50">
+      </div>
+    </div>
+  
+    <div class="form-group row">
+      <label for="minutes" class="col-12 col-sm-2 col-form-label col-form-label-sm">Minutes</label>
+      <div class="col-12 col-sm-10">
+      <input type="text" class="form-control form-control-sm" id="minutes" placeholder="5" value="5">
+      </div>
+    </div>
+    
+    <div class="form-group row">
+      <label for="vol" class="col-12 col-sm-2 col-form-label col-form-label-sm">買賣波幅(%)</label>
+      <div class="col-12 col-sm-10">
+      <input type="text" class="form-control form-control-sm" id="vol" placeholder="0.45" value="0.45">
+      </div>
+    </div>
+    
+    <div class="form-group row">
+      <label for="vol2" class="col-12 col-sm-2 col-form-label col-form-label-sm">平倉波幅(%)</label>
+      <div class="col-12 col-sm-10">
+      <input type="text" class="form-control form-control-sm" id="vol2" placeholder="0.00" value="0.00">
+      </div>
+    </div>
+    
+    <div class="form-group row">
+      <label for="cutLoss" class="col-12 col-sm-2 col-form-label col-form-label-sm">CutLoss Ratio</label>
+      <div class="col-12 col-sm-10">
+      <input type="text" class="form-control form-control-sm" id="cutLoss" placeholder="1.2" value="1.2">
+      </div>
+    </div>
+    
+    <fieldset class="form-group">
+    <div class="row">
+      <legend class="col-form-label col-sm-2 pt-0">Direction</legend>
+      <div class="col-12 col-sm-10">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="direction" id="long" value="long" checked>
+          <label class="form-check-label" for="long">Long</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="direction" id="short" value="short">
+          <label class="form-check-label" for="short">Short</label>
+        </div>
+      </div>
+    </div>
+    </fieldset>
+    
+    <div class="form-group">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="adjustment">
+      <label class="form-check-label" for="adjustment">Use adjustment</label>
+    </div>
+    </div>
+    
+    <button type="button" class="btn btn-sm btn-primary" id="submit">Submit</button>
+  
+  </form>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-12 col-sm-12">
+<div class="body-container">
+  <div id="tb-result2"></div>
+  <br />
+  <div id="tb-result"></div>
 </div>
 </div>
 </div>
