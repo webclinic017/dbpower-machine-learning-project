@@ -46,9 +46,9 @@ $(document).ready(function() {
         
         function formatColor(val, isFormat) {
           if (val <= 0 && isFormat)
-            return '<span class="text-danger">'+val+'</span>'
-          else if (val > 0 && isFormat)
             return '<span class="text-success">'+val+'</span>'
+          else if (val > 0 && isFormat)
+            return '<span class="text-danger">+'+val+'</span>'
           else if (!isFormat)
             return '<span>'+val+'</span>'
         }
@@ -61,13 +61,15 @@ $(document).ready(function() {
         html2 += '<td> Avg Profit: '+formatColor(obj.avg_profit, true)+' </td>';
         html2 += '<td> Max Win(单笔): '+formatColor(obj.max_win, true)+' </td>';
         html2 += '<td> Max Loss(单笔): '+formatColor(obj.max_loss, true)+' </td>';
+        html2 += '<td> No.Trade Day: '+formatColor(obj.no_total_day, false)+' </td>';
         html2 += '</tr>';
         
         html2 += '<tr>';
-        html2 += '<td> No.Trade(买+卖): '+formatColor(obj.no_trade, false)+' </td>';
+        html2 += '<td> No.Trade: '+formatColor(obj.no_trade, false)+' </td>';
         html2 += '<td> No.Win: '+formatColor(obj.no_win, false)+' </td>';
         html2 += '<td> No.Loss: '+formatColor(obj.no_loss, false)+' </td>';
         html2 += '<td> No.Cut Loss: '+formatColor(obj.no_cut_loss, false)+' </td>';
+        html2 += '<td> Avg Daily No.Trade: '+formatColor(obj.avg_no_trade, false)+' </td>';
         html2 += '</tr>';
         
         html2 += '</tbody>';
@@ -125,7 +127,7 @@ $(document).ready(function() {
     <div class="form-group row">
       <label for="cutLoss" class="col-12 col-sm-2 col-form-label col-form-label-sm">CutLoss Ratio</label>
       <div class="col-12 col-sm-10">
-      <input type="text" class="form-control form-control-sm" id="cutLoss" placeholder="1.2" value="1.2">
+      <input type="text" class="form-control form-control-sm" id="cutLoss" placeholder="1.05" value="1.05">
       </div>
     </div>
     
