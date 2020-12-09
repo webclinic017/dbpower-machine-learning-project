@@ -129,6 +129,7 @@ def result():
     max_loss = df6['profit'].min().round(2)
     no_win = int(np.sum(df6['profit'] > 0))
     no_loss = int(np.sum(df6['profit'] <= 0))
+    no_cut_loss = int(np.sum(df6['action'] == 'cut'))
     # 5.2 加颜色
     for k5, v5 in df6.iterrows():
         # 5.3 profit
@@ -142,7 +143,7 @@ def result():
         elif df6.loc[k5, 'cash'] <= 0:
             df6.loc[k5, 'cash'] = '<font class="text-success">'+str(df6.loc[k5, 'cash'])+'</font>'
     html = df6.to_html(classes='table table-sm table-striped', index=False, escape=False, border=0).replace('border="1"', 'border="0"').replace('NaN', '')
-    data5 = json.dumps({'no_trade': no_trade, 'no_win': no_win, 'no_loss': no_loss,
+    data5 = json.dumps({'no_trade': no_trade, 'no_win': no_win, 'no_loss': no_loss, 'no_cut_loss': no_cut_loss,
                         'total_profit': total_profit, 'avg_profit': avg_profit, 'max_win': max_win, 'max_loss': max_loss,
                         'html': html})
 

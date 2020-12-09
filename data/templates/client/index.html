@@ -43,6 +43,7 @@ $(document).ready(function() {
         var obj = JSON.parse(res);
         ui.tbResult.html(obj.html);
         
+        
         function formatColor(val, isFormat) {
           if (val <= 0 && isFormat)
             return '<span class="text-danger">'+val+'</span>'
@@ -51,16 +52,27 @@ $(document).ready(function() {
           else if (!isFormat)
             return '<span>'+val+'</span>'
         }
-        var html1 = '';
-        html1 += 'Total Profit:'+formatColor(obj.total_profit, true);
-        html1 += 'Avg Profit:'+formatColor(obj.avg_profit, true);
-        html1 += 'Max Win(单笔):'+formatColor(obj.max_win, true);
-        html1 += 'Max Loss(单笔):'+formatColor(obj.max_loss, true);
+        html2 = '';
+        html2 += '<table class="table table-bordered">';
+        html2 += '<tbody>';
         
-        html1 += 'No.Trade(买卖):'+formatColor(obj.no_trade, false);
-        html1 += 'No.Win:'+formatColor(obj.no_win, false);
-        html1 += 'No.Loss:'+formatColor(obj.no_loss, false);
-        ui.tbResult2.html(html1);
+        html2 += '<tr>';
+        html2 += '<td> Total Profit: '+formatColor(obj.total_profit, true)+' </td>';
+        html2 += '<td> Avg Profit: '+formatColor(obj.avg_profit, true)+' </td>';
+        html2 += '<td> Max Win(单笔): '+formatColor(obj.max_win, true)+' </td>';
+        html2 += '<td> Max Loss(单笔): '+formatColor(obj.max_loss, true)+' </td>';
+        html2 += '</tr>';
+        
+        html2 += '<tr>';
+        html2 += '<td> No.Trade(买+卖): '+formatColor(obj.no_trade, false)+' </td>';
+        html2 += '<td> No.Win: '+formatColor(obj.no_win, false)+' </td>';
+        html2 += '<td> No.Loss: '+formatColor(obj.no_loss, false)+' </td>';
+        html2 += '<td> No.Cut Loss: '+formatColor(obj.no_cut_loss, false)+' </td>';
+        html2 += '</tr>';
+        
+        html2 += '</tbody>';
+        html2 += '</table>';
+        ui.tbResult2.html(html2);
         ui.divResult.show();
       }
     });
@@ -70,7 +82,7 @@ $(document).ready(function() {
 });
 </script>
 <style>
-#tb-result2 span {font-size: 26px; margin-right: 52px;}
+#tb-result2 span {font-size: 26px;}
 </style>
 <body>
 {% include 'navbar.html' %}
