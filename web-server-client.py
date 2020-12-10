@@ -62,6 +62,9 @@ def result():
     df2['pchange'] = (df2['plast'] - df2['Close']) / df2['Close']*100 # 预测 5分钟后的 波幅率
     df2['pchange1'] = (df2['plast1'] - df2['Close']) / df2['Close']*100 # 预测 1分钟后的 波幅率
 
+    df2['real(t+1)'] = df2['Close'].shift(periods=-1)
+    df2['real(t+5)'] = df2['Close'].shift(periods=-5)
+
     # 3.0 回测
     df4 = pd.DataFrame(columns = ['udate', 'action', 'cash', 'profit', 'message'])
     holding = False # 是否持有仓位
@@ -148,7 +151,8 @@ def result():
     
     # 5.0 渲染1
     df6 = df5.loc[(df5['action']=='buy') | (df5['action']=='sell') | (df5['action']=='cut') | (df5['action']=='cut overnight')]
-    df6.columns = ['udate', 'last', 'predict1(T+1)', 'predict1(T+5)', 'atr', 'shift', 'predict2(T+1)', 'predict2(T+5)', 'p-percent1', 'p-percent5', 'action', 'cash', 'profit', 'message', 'hold time']
+    df6.columns = ['udate', 'last', 'predict1(T+1)', 'predict1(T+5)', 'atr', 'shift', 'predict2(T+1)', 'predict2(T+5)', 'p-percent1', 'p-percent5', 'real(t+1)', 'real(t+5)', 
+                   'action', 'cash', 'profit', 'message', 'hold time']
     df6['cash'] = df6['cash'].round(4)
     df6['profit'] = df6['profit'].round(2)
     # 5.1 渲染2
