@@ -39,6 +39,7 @@ $(document).ready(function() {
       url: "./result",
       type: "POST",
       data: data,
+      timeout: 30*1000,
       success: function(res) {
         var obj = JSON.parse(res);
         ui.tbResult.html(obj.html);
@@ -70,6 +71,12 @@ $(document).ready(function() {
         html2 += '<td> No.Loss: '+formatColor(obj.no_loss, false)+' </td>';
         html2 += '<td> No.Cut Loss: '+formatColor(obj.no_cut_loss, false)+' </td>';
         html2 += '<td> Avg Daily No.Trade: '+formatColor(obj.avg_no_trade, false)+' </td>';
+        html2 += '</tr>';
+        
+        html2 += '<tr>';
+        html2 += '<td> Avg Hold Time: '+formatColor(obj.hold_time_avg, false)+' mins </td>';
+        html2 += '<td> Max Hold Time: '+formatColor(obj.hold_time_max, false)+' mins </td>';
+        html2 += '<td> Min Hold Time: '+formatColor(obj.hold_time_min, false)+' mins </td>';
         html2 += '</tr>';
         
         html2 += '</tbody>';
@@ -127,7 +134,7 @@ $(document).ready(function() {
     <div class="form-group row">
       <label for="cutLoss" class="col-12 col-sm-2 col-form-label col-form-label-sm">CutLoss Ratio</label>
       <div class="col-12 col-sm-10">
-      <input type="text" class="form-control form-control-sm" id="cutLoss" placeholder="1.05" value="1.05">
+      <input type="text" class="form-control form-control-sm" id="cutLoss" placeholder="1.50" value="1.50">
       </div>
     </div>
     
