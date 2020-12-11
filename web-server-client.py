@@ -24,7 +24,8 @@ def index():
 @app.route('/result', methods=['GET', 'POST'])
 def result():
     # 1.0 传叁
-    file = request.form.get('file') # 文件
+    file1 = request.form.get('file1') # 文件1
+    file2 = request.form.get('file2') # 文件2
     direction = request.form.get('direction') # 方向
     vol = float(request.form.get('vol'))  # 买卖波幅
     vol2 = float(request.form.get('vol2'))  # 止蚀波幅
@@ -33,7 +34,7 @@ def result():
     minutes = int(request.form.get('minutes')) # 预测x分钟后
     
     # 1.1 数据集
-    path1 = os.path.abspath(os.path.join('data', 'nq', 'prediction', file+'.csv'))
+    path1 = os.path.abspath(os.path.join('data', 'nq', 'prediction', file1, file2+'.csv'))
     df1 = pd.read_csv(path1)
     df1.udate = pd.to_datetime(df1.udate)
     df1.index = pd.to_datetime(df1.udate)
@@ -194,6 +195,18 @@ def result():
     data5 = json.dumps(data4)
 
     return data5
+
+
+@app.route('/files', methods=['GET', 'POST'])
+def files():
+    data = {}
+    for root, dirs, files in walk(os.path.abspath(os.path.join('data', 'nq', 'prediction'))):
+        if not dirs:
+            data[os.path.basename(os.path.normpath(root))] = [file.replace('.csv', '') for file in sorted(files)]
+    data2 = {}
+    for k in sorted(data, reverse=True):
+        data2[k] = data[k]
+    return json.dumps(data2)
 
 
 if __name__ == '__main__':

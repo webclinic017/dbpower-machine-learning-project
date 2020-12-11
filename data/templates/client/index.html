@@ -2,11 +2,14 @@
 <head>{% include 'header.html' %}</head>
 <script>
 var ui = {};
+var global = {};
+
 function initUI() {
   ui.tbResult = $('#tb-result');
   ui.tbResult2 = $('#tb-result2');
   ui.divResult = $('#tb-result').parent().parent().parent('.row');
-  ui.file = $('#file');
+  ui.slFile1 = $('#file1');
+  ui.slFile2 = $('#file2');
   ui.tvMinutes = $('#minutes');
   ui.tvVol = $('#vol');
   ui.tvVol2 = $('#vol2');
@@ -19,6 +22,31 @@ $(document).ready(function() {
   initUI();
   ui.divResult.hide();
   
+  // 档案名
+  $.ajax({
+    url: "./files",
+    type: "POST",
+    timeout: 30*1000,
+    success: function(res) {
+      global.files = JSON.parse(res);
+      for (const [k, v] of Object.entries(global.files))
+        ui.slFile1.append($('<option></option>').attr('value', k).text(k));
+      
+      var firstKey = Object.keys(global.files)[0];
+      for (file of global.files[firstKey])
+        ui.slFile2.append($('<option></option>').attr('value', file).text(file));
+    }
+  });
+  
+  // 刷新档案名
+  ui.slFile1.change(function() {
+    var k = $(this).val();
+    ui.slFile2.empty();
+    for (file of global.files[k])
+      ui.slFile2.append($('<option></option>').attr('value', file).text(file));
+  });
+  
+  // 回测
   ui.btnSubmit.click(function() {
     initUI();
     ui.tbResult.html('');
@@ -26,7 +54,8 @@ $(document).ready(function() {
     ui.divResult.hide();
     
     var data = {
-      file: ui.file.val(),
+      file1: ui.slFile1.val(),
+      file2: ui.slFile2.val(),
       minutes: ui.tvMinutes.val(),
       vol: ui.tvVol.val(),
       vol2: ui.tvVol2.val(),
@@ -110,8 +139,11 @@ $(document).ready(function() {
   
     <div class="form-group row">
       <label for="file" class="col-12 col-sm-2 col-form-label col-form-label-sm">File</label>
-      <div class="col-12 col-sm-10">
-      <input type="text" class="form-control form-control-sm" id="file" placeholder="t5-0608-0922-e10-u512-w50" value="t5-0608-0922-e10-u512-w50">
+      <div class="col-6 col-sm-5">
+      <select id="file1" class="form-control form-control-sm"></select>
+      </div>
+      <div class="col-6 col-sm-5">
+      <select id="file2" class="form-control form-control-sm"></select>
       </div>
     </div>
   
@@ -125,7 +157,7 @@ $(document).ready(function() {
     <div class="form-group row">
       <label for="vol" class="col-12 col-sm-2 col-form-label col-form-label-sm">買賣波幅(%)</label>
       <div class="col-12 col-sm-10">
-      <input type="text" class="form-control form-control-sm" id="vol" placeholder="0.45" value="0.45">
+      <input type="text" class="form-control form-control-sm" id="vol" placeholder="0.35" value="0.35">
       </div>
     </div>
     
