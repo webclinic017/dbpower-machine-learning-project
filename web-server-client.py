@@ -93,9 +93,12 @@ def result():
 
     df3 = df2.copy(deep=True)
     for k1, v1 in df3.iterrows():
-        if v1['udate'].hour < 15 or v1['udate'].hour >= 19:
+        if v1['udate'].hour <= 14 or v1['udate'].hour >= 19:
+            # 时间
+            cur_time, close_time = time(v1.udate.hour, v1.udate.minute, 0), time(14, 59, 0)
+            is_over_night = (cur_time == close_time) # 过夜
             # 3.2 买入
-            if is_trigger(v1, vol) and not holding:
+            if is_trigger(v1, vol) and not is_over_night and not holding:
                 holding = True
                 cost1 = v1['Close']
                 top_profit_price = v1['Close']
@@ -106,8 +109,6 @@ def result():
             # 3.3 卖出
             cut_loss2 = is_cut_loss(v1, vol2) # 止蚀
             stop_profit2 = is_stop_profit(v1, top_profit_price, direction) # 止盈
-            cur_time, close_time = time(v1.udate.hour, v1.udate.minute, 0), time(14, 59, 0)
-            is_over_night = (cur_time == close_time) # 过夜
             if (cut_loss2 or stop_profit2 or is_over_night) and holding:
                 holding = False
                 # 3.4 持有时长
@@ -118,9 +119,9 @@ def result():
                 elif direction == 'short':
                     profit2 = (cost1-v1['Close'])*20 - (fee*2)
                 if profit2 > 0:
-                    profit3 = '<span class="text-danger">+'+str(profit2)+'</span>'
+                    profit3 = '<span class="text-danger">+'+str(round(profit2, 1))+'</span>'
                 elif profit2 <= 0:
-                    profit3 = '<span class="text-success">'+str(profit2)+'</span>'
+                    profit3 = '<span class="text-success">'+str(round(profit2, 1))+'</span>'
                 message = '('+str(cost1)+' - '+str(v1['Close'])+')*20 - ('+str(fee)+'*2) = '+profit3
                 # 3.6 长仓
                 if direction == 'long' and stop_profit2:
@@ -138,7 +139,7 @@ def result():
                     action = 'cut overnight'
                 # 3.8 资金流
                 cash = cash + profit2
-                
+
                 df4 = df4.append({'udate': k1, 'action': action, 'cash': cash, 'profit': profit2, 'hold time': mins_diff, 'message': message}, ignore_index=True)
                 continue
 
