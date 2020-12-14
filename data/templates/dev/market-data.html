@@ -1,0 +1,38 @@
+<html>
+<head>{% include 'header.html' %}</head>
+<script>
+var ui = {};
+function initUI() {}
+$(document).ready(function() {
+  initUI();
+  hljs.initHighlightingOnLoad();
+});
+</script>
+<style>
+</style>
+<body>
+{% include 'navbar.html' %}
+<div class="container">
+
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+  <h6> Current Day Data: {{ data3 }} </h6>
+  {{ data4 | safe }}
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-sm-12">
+<div class="body-container">
+  <h6> Total Days: {{ data2 }} </h6>
+  <h6> Total Rows: {{ data5 }} </h6>
+  {{ data | safe }}
+</div>
+</div>
+</div>
+
+</div>
+</body>
+<html>

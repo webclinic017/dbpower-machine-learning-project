@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from os import listdir, walk
 from os.path import isfile, join
+import sqlite3 as sqlite3
 import pandas as pd
 import warnings
 import os
@@ -65,6 +66,26 @@ def markdown():
 @app.route('/install', methods=['GET', 'POST'])
 def install():
     return render_template('./install.html')
+
+@app.route('/market-data', methods=['GET', 'POST'])
+def market_data():
+    path_db = os.path.abspath(os.path.join('data', 'nq', 'data', 'nq.db'))
+    db = sqlite3.connect(path_db)
+    cursor = db.cursor()
+    stmt1 = "select strftime('%Y-%m-%d', udate) as 'udate', count(udate) as no from nq where strftime('%S', udate) == '00' group by strftime('%Y-%m-%d', udate) order by udate desc"
+    df1 = pd.read_sql_query(stmt1, db)
+    cur_date = df1.iloc[0]['udate']
+    stmt2 = "select * from nq where strftime('%Y-%m-%d', udate) == '"+cur_date+"' order by udate desc"
+    df2 = pd.read_sql_query(stmt2, db)
+    db.commit()
+    cursor.close()
+    db.close()
+    return render_template('./market-data.html', 
+                           data3="{:,}".format(int(df2.shape[0])),
+                           data4=df2.head(100).to_html(classes='table table-sm table-striped', index=False, justify='left').replace('border="1"','border="0"'),
+                           data2=df1.shape[0], 
+                           data=df1.head(100).to_html(classes='table table-sm table-striped', index=False, justify='left').replace('border="1"','border="0"'),
+                           data5="{:,}".format(int(df1.sum()['no'])))
 
 if __name__ == '__main__':
     app.debug = True
