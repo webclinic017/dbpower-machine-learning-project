@@ -2,13 +2,19 @@ from flask import Flask, render_template, request
 from os import listdir, walk
 from os.path import isfile, join
 from datetime import datetime, timedelta, date, time
+from threading import Thread
+import sqlite3 as sqlite3
 import pandas as pd
 import warnings as warnings
 import os as os
 import numpy as np
 import talib as talib
 import json as json
+import common as common
+import time as time1
+import joblib as joblib
 pd.options.mode.chained_assignment = None
+
 
 template_dir = os.path.join(os.path.abspath('data'), 'templates', 'client')
 static_folder = os.path.join(os.path.abspath('data'))
@@ -210,6 +216,97 @@ def files():
     return json.dumps(data2)
 
 
+class Worker(Thread):
+    # 1.0 抓取数据
+    def get_data(self, no_day):
+        path_db = os.path.abspath(os.path.join('data', 'nq', 'data', 'nq.db'))
+        db = sqlite3.connect(path_db)
+        cursor = db.cursor()
+        stmt1 = "select strftime('%Y-%m-%d', udate) as 'udate' from nq group by strftime('%Y-%m-%d', udate) " \
+                "order by udate desc LIMIT "+str(no_day)
+        df1 = pd.read_sql_query(stmt1, db)
+        end_date, start_date = df1.iloc[0].udate, df1.iloc[-1].udate
+        stmt2 = "select udate, high, low, open, close, vol from nq where (strftime('%Y-%m-%d', udate) between '"+start_date+\
+                "' AND '"+end_date+"') AND strftime('%S', udate) == '00'"
+        df2 = pd.read_sql_query(stmt2, db)
+        db.commit()
+        cursor.close()
+        db.close()
+        # 1.1 格式化
+        df2 = df2.rename(columns={'high': 'High', 'low': 'Low', 'open': 'Open', 'close': 'Close', 'vol': 'Volume'})
+        types1 = {'udate': 'object', 'High': 'float64', 'Low': 'float64', 'Open': 'float64', 'Close': 'float64', 'Volume': 'int64'}
+        df2.astype(types1).dtypes
+        df2.udate = pd.to_datetime(df2.udate)
+        df2.index = pd.to_datetime(df2.udate)
+        return df2
+
+    # 2.0 技术指标
+    def get_ta(self, df):
+        # 2.0
+        highs = np.array(df['High'], dtype='float')
+        lows = np.array(df['Low'], dtype='float')
+        opens = np.array(df['Open'], dtype='float')
+        closes = np.array(df['Close'], dtype='float')
+        vols = np.array(df['Volume'], dtype='float')
+        # 2.1 Bollinger 保力加
+        df['upper-band'], df['middle-band'], df['lower-band'] = talib.BBANDS(closes, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
+        # 3.2 %B %保力加
+        df['%b'] = (df['Close'] - df['lower-band']) / (df['upper-band'] - df['lower-band']) * 100
+        df['%b-high'] = common.percentB_belowzero(df['%b'], df['Close'])
+        df['%b-low'] = common.percentB_aboveone(df['%b'], df['Close'])
+        # 2.3 MACD
+        weight = 1.5
+        df['macd'], df['macdsignal'], df['macdhist'] = talib.MACD(closes, fastperiod=12 * weight, slowperiod=26 * weight, signalperiod=9 * weight)
+        # 2.4 RSI
+        df['rsi-2'] = talib.RSI(closes, timeperiod=14 * weight)
+        df['rsi'] = df['rsi-2']
+        df['rsi'].loc[((df['rsi'] < 85) & (df['rsi'] > 25))] = 0
+        # 2.5 KDJ
+        df['k-kdj'], df['d-kdj'], df['j-kdj'] = common.kdj(highs, lows, closes, window_size=5)
+        df['diff-kdj'] = df['k-kdj'] - df['d-kdj']
+        df['j-kdj'].loc[((df['j-kdj'] > 20) & (df['j-kdj'] < 100))] = 0
+        # 3.7 SMA 均線
+        for v in [15, 50, 100, 200]:
+            df['sma-' + str(v)] = talib.SMA(closes, timeperiod=v)
+        df.drop(df.columns.difference(['Close', '%b', '%b-high', '%b-low', 'macdhist', 'rsi', 'j-kdj', 'diff-kdj', 'sma-15', 'sma-50', 'sma-100', 'sma-200']), 1, inplace=True)
+        return df
+
+    # 3.0 预测模型
+    def run_model(self, df, prefix1, prefix2):
+        # 3.1 正则化
+        path_name = os.path.abspath(os.path.join('min_max_scaler', prefix1 + '-' + prefix2 + '.pkl'))
+        scalers = joblib.load(path_name)
+        scaler = scalers[list(scalers.keys())[-1]]
+        df2 = scaler['scaler'].transform(df)
+        df2 = pd.DataFrame(df2, columns=df.columns, index=df.index)
+        df2['udate'] = df.index
+
+        # 3.2 模型
+        path_model = os.path.abspath(os.path.join('saved_model', prefix1 + '-' + prefix2 + '.h5'))
+        print(path_model)
+        return df2
+
+    def run(self):
+        while True:
+            cur_minute, cur_second = datetime.today().minute, datetime.today().second
+            if cur_second == 5:
+                # 1.0 抓取数据
+
+                # 2.0 技术指标
+
+                # 3.0 预测模型
+
+                # 4.0 买卖策略
+
+                # 5.0 IB接囗
+                pass
+            time1.sleep(2)
+
+
 if __name__ == '__main__':
+    Worker().start()
+    df = Worker().get_data(30)
+    df = Worker().get_ta(df)
+    df2 = Worker().run_model(df, 'nq-lstm', '20201214-142731')
     app.debug = True
     app.run(host='0.0.0.0', port=83)
