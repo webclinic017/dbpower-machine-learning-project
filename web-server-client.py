@@ -15,6 +15,8 @@ import common as common
 import time as time1
 import joblib as joblib
 import tensorflow as tf
+import requests as requests
+
 pd.options.mode.chained_assignment = None
 np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
@@ -32,18 +34,7 @@ def index():
     return render_template('./index.html')
 
 
-@app.route('/result', methods=['GET', 'POST'])
-def result():
-    # 1.0 传叁
-    file1 = request.form.get('file1') # 文件1
-    file2 = request.form.get('file2') # 文件2
-    direction = request.form.get('direction') # 方向
-    vol = float(request.form.get('vol'))  # 买卖波幅
-    vol2 = float(request.form.get('vol2'))  # 止蚀波幅
-    cutloss = float(request.form.get('cutLoss'))  # 止蚀
-    is_adjust = False if request.form.get('adjection')=='false' else True # 调整
-    minutes = int(request.form.get('minutes')) # 预测x分钟后
-    
+def algo(file1, file2, direction, vol, vol2, cutloss, is_adjust, minutes):
     # 1.1 数据集
     path1 = os.path.abspath(os.path.join('data', 'nq', 'prediction', file1, file2+'.csv'))
     df1 = pd.read_csv(path1)
@@ -65,7 +56,7 @@ def result():
 
     key2 = 't'+str(minutes)
     if not is_adjust:
-        df2['plast'] = df2[key2] # 预测 5分钟后的 波幅 
+        df2['plast'] = df2[key2] # 预测 5分钟后的 波幅
         df2['plast1'] = df2['t1'] # 预测 1分钟后的 波幅
     else:
         df2['plast'] = df2[key2] + df2['adjust'] # 已调整
@@ -161,19 +152,36 @@ def result():
     df5 = pd.concat([df2, df4], axis=1)
     drop_list_5 = ['High', 'Low', 'Open', 'Volume', 't2', 't3', 't4', 'last1']
     df5.drop(drop_list_5, axis=1, inplace=True)
+    return df5
+
+
+@app.route('/result', methods=['GET', 'POST'])
+def result():
+    # 1.0 传叁
+    file1 = request.form.get('file1') # 文件1
+    file2 = request.form.get('file2') # 文件2
+    direction = request.form.get('direction') # 方向
+    vol = float(request.form.get('vol'))  # 买卖波幅
+    vol2 = float(request.form.get('vol2'))  # 止蚀波幅
+    cutloss = float(request.form.get('cutLoss'))  # 止蚀
+    is_adjust = False if request.form.get('adjection')=='false' else True # 调整
+    minutes = int(request.form.get('minutes')) # 预测x分钟后
     
+    df5 = algo(file1, file2, direction, vol, vol2, cutloss, is_adjust, minutes)
+
     # 5.0 渲染1
     df6 = df5.loc[(df5['action']=='buy') | (df5['action']=='sell') | (df5['action']=='cut') | (df5['action']=='cut overnight')]
     df6.columns = ['udate', 'last', 'predict1(T+1)', 'predict1(T+5)', 'atr', 'shift', 'predict2(T+1)', 'predict2(T+5)', 'p-percent1', 'p-percent5', 'real(t+1)', 'real(t+5)', 
                    'action', 'cash', 'profit', 'message', 'hold time']
     df6['cash'] = df6['cash'].round(4)
     df6['profit'] = df6['profit'].round(2)
+
     # 5.1 渲染2
     if direction == 'long':
         no_trade = df6.loc[(df6['action']=='buy')].shape[0]
     elif direction == 'short':
         no_trade = df6.loc[(df6['action']=='sell')].shape[0]
-    total_profit = df6.iloc[-1]['cash'].round(2)
+    total_profit = df6.loc[(df6['cash'] > 0)]['cash'].values.tolist()[-1]
     avg_profit = df6['profit'].mean().round(2)
     max_win = df6['profit'].max().round(2)
     max_loss = df6['profit'].min().round(2)
@@ -358,28 +366,39 @@ class Worker(Thread):
         df7.to_csv(path_3)
         return df7
 
+    # 4.0 买卖策略
+    def algo2(self):
+        df4 = algo(file1='production', file2='nq-prediction-production', direction='long', vol=0.05, vol2=0.00, cutloss=2.00, is_adjust='false', minutes=5)
+        cur_action = df4.iloc[-1]['action']
+        params = {'side': None, 'quantity': '1', 'symbol': 'NQ', 'exchange': 'GLOBEX'}
+        if cur_action in ['buy']:
+            params['side'] = 'buy'
+            res = requests.get(url='http://127.0.0.1:84/place-market-order', params=params)
+            print(res.json())
+        elif cur_action in ['sell', 'cut',  'cut overnight']:
+            params['side'] = 'sell'
+            res = requests.get(url='http://127.0.0.1:84/place-market-order', params=params)
+            print(res.json())
+        return df4
+
     def run(self):
         while True:
             cur_minute, cur_second = datetime.today().minute, datetime.today().second
             if cur_second == 5:
                 # 1.0 抓取数据
-
+                df = self.get_data(no_day=4)
                 # 2.0 技术指标
-
+                df2 = df.copy(deep=True)
+                df2 = self.get_ta(df2)
                 # 3.0 预测模型
-
+                df3 = self.run_model(df=df2, df_o=df, prefix1='nq-lstm', prefix2='20201214-142731')
                 # 4.0 买卖策略
-
-                # 5.0 IB接囗
+                df4 = self.algo2()
                 pass
             time1.sleep(2)
 
 
 if __name__ == '__main__':
     Worker().start()
-    df = Worker().get_data(no_day=4)
-    df2 = df.copy(deep=True)
-    df2 = Worker().get_ta(df2)
-    df3 = Worker().run_model(df=df2, df_o=df, prefix1='nq-lstm', prefix2='20201214-142731')
     app.debug = True
     app.run(host='0.0.0.0', port=83)
