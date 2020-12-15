@@ -3,6 +3,7 @@ from os import listdir, walk
 from os.path import isfile, join
 from datetime import datetime, timedelta, date, time
 from threading import Thread
+from itertools import repeat
 import sqlite3 as sqlite3
 import pandas as pd
 import warnings as warnings
@@ -13,8 +14,12 @@ import json as json
 import common as common
 import time as time1
 import joblib as joblib
+import tensorflow as tf
 pd.options.mode.chained_assignment = None
+np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
+my_devices = tf.config.experimental.list_physical_devices(device_type='CPU')
+tf.config.experimental.set_visible_devices(devices= my_devices, device_type='CPU')
 
 template_dir = os.path.join(os.path.abspath('data'), 'templates', 'client')
 static_folder = os.path.join(os.path.abspath('data'))
@@ -272,7 +277,7 @@ class Worker(Thread):
         return df
 
     # 3.0 预测模型
-    def run_model(self, df, prefix1, prefix2):
+    def run_model(self, df, df_o, prefix1, prefix2):
         # 3.1 正则化
         path_name = os.path.abspath(os.path.join('min_max_scaler', prefix1 + '-' + prefix2 + '.pkl'))
         scalers = joblib.load(path_name)
@@ -281,10 +286,77 @@ class Worker(Thread):
         df2 = pd.DataFrame(df2, columns=df.columns, index=df.index)
         df2['udate'] = df.index
 
-        # 3.2 模型
+        # 3.2 预处理
+        t_pus_no = 5
+        window_size = 50
+        x_valid, date_valid = np.array([]), []
+        data2 = common.separate_daily(df2, 'dict')
+        for day, df3 in data2.items():
+            # print(day, df3.iloc[0]['udate'], df3.iloc[-1]['udate'])
+            if df3.shape[0] > window_size+t_pus_no:
+                df3.drop(['udate'], axis=1, inplace=True)
+                # 5.5.3 窗口
+                no_max = df3.shape[0]+1
+                x_data = []
+                for i in range(window_size, no_max):
+                    start, end = i - window_size, i
+                    # y label
+                    temp_2 = df3.iloc[end - 1: end + t_pus_no - 1]  # current time
+                    # x matrix
+                    temp_1 = df3.iloc[start: end]
+                    x_data.append(temp_1)
+                    # date
+                    days4 = temp_2.index.tolist()
+                    date_valid.append(days4)
+                x_data = np.array(x_data)
+                x_data[np.isnan(x_data)] = 0.0
+                # 5.5.4 分集1
+                if x_valid.any():
+                    x_valid = np.concatenate((x_valid, x_data), axis=0)
+                # 5.5.5 分集2
+                elif not x_valid.any():
+                    x_valid = x_data
+        print('验证集: X_Valid Data: {}, Date_Valid: {}'.format(x_valid.shape, np.array(date_valid).shape))
+
+        # 3.3 模型
         path_model = os.path.abspath(os.path.join('saved_model', prefix1 + '-' + prefix2 + '.h5'))
-        print(path_model)
-        return df2
+        model = tf.keras.models.load_model(path_model, compile=False)
+        predict1 = model.predict(x_valid)
+        df3 = pd.DataFrame(predict1, columns=['t1', 't2', 't3', 't4', 't5'])
+        date_valid2 = [v[0] for v in date_valid]
+        df3['udate'] = date_valid2
+        df3.index = df3['udate']
+
+        # 3.4 逆向
+        len_shape_y = df2.shape[1] - 2
+        fill_list = list(repeat(0, len_shape_y))
+        df3_1 = df3.drop(['udate'], axis=1)
+        df4_1 = pd.DataFrame()
+        data4 = []
+        for k1, v1 in df3_1.iterrows():
+            data4_1 = []
+            for v2 in v1:
+                data4_1.append([v2] + fill_list)
+            data4_2 = scaler['scaler'].inverse_transform(data4_1)
+            data4_3 = [v[0] for v in data4_2]
+            data4.append(data4_3)
+        # 3.4.1
+        df4_5 = pd.DataFrame(data4, columns=['t1', 't2', 't3', 't4', 't5'])
+        df4_5.index = df3['udate']
+        # 3.4.2 合併
+        if df4_5.shape[0] > 0:
+            df4_1 = pd.concat([df4_1, df4_5], axis=0, join='outer', ignore_index=False, keys=None, levels=None, names=None, verify_integrity=False, copy=True)
+
+        # 3.5 后处理
+        df_o = df_o.drop(['udate'], axis=1)
+        df5 = pd.concat([df_o, df4_1], axis=1)
+        path_3 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'production', 'nq-prediction-production.csv'))
+        if os.path.exists(path_3):
+            os.remove(path_3)
+        df6 = df5.loc[(df5['t1'] > 0)]
+        df7 = pd.concat([df5.head(window_size), df6], axis=0, join='outer', ignore_index=False, keys=None, levels=None, names=None, verify_integrity=False, copy=True)
+        df7.to_csv(path_3)
+        return df7
 
     def run(self):
         while True:
@@ -305,8 +377,9 @@ class Worker(Thread):
 
 if __name__ == '__main__':
     Worker().start()
-    df = Worker().get_data(30)
-    df = Worker().get_ta(df)
-    df2 = Worker().run_model(df, 'nq-lstm', '20201214-142731')
+    df = Worker().get_data(no_day=4)
+    df2 = df.copy(deep=True)
+    df2 = Worker().get_ta(df2)
+    df3 = Worker().run_model(df=df2, df_o=df, prefix1='nq-lstm', prefix2='20201214-142731')
     app.debug = True
     app.run(host='0.0.0.0', port=83)
