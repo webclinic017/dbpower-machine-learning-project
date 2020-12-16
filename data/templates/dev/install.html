@@ -20,6 +20,9 @@ $(document).ready(function() {
 
 <h6>Installation Guide</h6><br />
 
+解压
+<pre><code class="powershell">sudo tar -xzf pycharm-community-2020.3.tar.gz</code></pre>
+
 下載
 <pre><code class="powershell">curl –O [URL]</code></pre>
 
@@ -116,6 +119,13 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PAT
 <a target="_blank" href="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html">CUDA Toolkit and Compatible Driver 版本對照表</a><br />
 <a target="_blank" href="https://docs.nvidia.com/deeplearning/frameworks/tensorflow-release-notes/rel_20-08.html#rel_20-08">Tensorflow-release-notes</a><br />
 <a target="_blank" href="https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html">Docker container</a><br /><br />
+
+<strong>测试 cuda</strong><br />
+<pre><code class="powershell">git clone https://github.com/NVIDIA/cuda-samples
+cd cuda-samples
+sudo make all -j8
+cd bin/x86_64/linux/release
+./deviceQuery</code></pre>
 
 啟動
 <pre><code class="powershell">sudo jupyter lab --ip=0.0.0.0 --port=80 --allow-root --NotebookApp.iopub_data_rate_limit=1.0e10
