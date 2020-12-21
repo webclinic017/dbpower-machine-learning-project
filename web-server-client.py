@@ -38,8 +38,6 @@ def result():
 
     # 5.0 渲染1
     df6 = df5.loc[(df5['action']=='buy') | (df5['action']=='sell') | (df5['action']=='cut') | (df5['action']=='cut overnight')]
-    df6.columns = ['udate', 'last', 'predict1(T+1)', 'predict1(T+5)', 'atr', 'shift', 'predict2(T+1)', 'predict2(T+5)', 'p-percent1', 'p-percent5', 'real(t+1)', 'real(t+5)', 
-                   'action', 'cash', 'profit', 'message', 'hold time']
     df6['cash'] = df6['cash'].round(4)
     df6['profit'] = df6['profit'].round(2)
 

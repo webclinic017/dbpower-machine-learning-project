@@ -174,4 +174,8 @@ def algo(file1, file2, direction, vol, vol2, cutloss, is_adjust, minutes):
     df5 = pd.concat([df2, df4], axis=1)
     drop_list_5 = ['High', 'Low', 'Open', 'Volume', 't2', 't3', 't4', 'last1']
     df5.drop(drop_list_5, axis=1, inplace=True)
+
+    df5.columns = ['udate', 'last', 'predict1(T+1)', 'predict1(T+5)', 'atr', 'shift', 'predict2(T+1)', 'predict2(T+5)',
+                   'p-percent1', 'p-percent5', 'real(t+1)', 'real(t+5)',
+                   'action', 'cash', 'profit', 'message', 'hold time']
     return df5

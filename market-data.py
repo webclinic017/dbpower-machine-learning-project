@@ -9,7 +9,7 @@ pd.options.mode.chained_assignment = None
 
 
 df1 = pd.DataFrame(columns=['udate', 'high', 'low', 'open', 'close', 'vol'])
-url = 'http://chart.dbpower.com.hk/buysellchart/tradeticker_routerxxxxx.cgi?bar=999999&code=NQZ20&format=json&data=nqorderflow&date=&period=&minute=1'
+url = 'http://chart.dbpower.com.hk/buysellchart/tradeticker_routerxxxxx.cgi?bar=999999&code=NQH21&format=json&data=nqorderflow&date=&period=&minute=1'
 path_db = os.path.abspath(os.path.join('data', 'nq', 'data', 'nq.db'))
 
 
