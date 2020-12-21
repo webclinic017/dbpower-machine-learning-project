@@ -158,29 +158,35 @@ class Worker(Thread):
 
     # 4.0 买卖策略
     def algo2(self):
-        df4 = common.algo(file1='production', file2='nq-prediction-production', direction='long', vol=0.05, vol2=0.00, cutloss=2.00, is_adjust='false', minutes=5)
+        df4 = common.algo(file1='production', file2='nq-prediction-production', direction='long', vol=0.05, vol2=0.00, cutloss=2.00, is_adjust=False, minutes=5)
         cur_action = df4.iloc[-1]['action']
         params = {'side': None, 'quantity': '1', 'symbol': 'NQ', 'exchange': 'GLOBEX'}
         if cur_action in ['buy']:
             params['side'] = 'buy'
             res = requests.get(url='http://127.0.0.1:84/place-market-order', params=params)
+            print(params)
             print(res.json())
         elif cur_action in ['sell', 'cut',  'cut overnight']:
             params['side'] = 'sell'
             res = requests.get(url='http://127.0.0.1:84/place-market-order', params=params)
+            print(params)
             print(res.json())
         return df4
 
     def do(self):
-        # 1.0 抓取数据
-        df = self.get_data(no_day=4)
-        # 2.0 技术指标
-        df2 = df.copy(deep=True)
-        df2 = self.get_ta(df2)
-        # 3.0 预测模型
-        df3 = self.run_model(df=df2, df_o=df, prefix1='nq-lstm', prefix2='20201214-142731')
-        # 4.0 买卖策略
-        df4 = self.algo2()
+        try:
+            # 1.0 抓取数据
+            df = self.get_data(no_day=4)
+            # df = df.loc[(df['udate'] <= datetime(2020, 12, 18, 4, 41, 0))] # 时间拦截器
+            # 2.0 技术指标
+            df2 = df.copy(deep=True)
+            df2 = self.get_ta(df2)
+            # 3.0 预测模型
+            df3 = self.run_model(df=df2, df_o=df, prefix1='nq-lstm', prefix2='20201214-142731')
+            # 4.0 买卖策略
+            df4 = self.algo2()
+        except:
+            pass
 
     def run(self):
         while True:
