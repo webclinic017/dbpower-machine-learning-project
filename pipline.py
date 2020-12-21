@@ -1,6 +1,7 @@
 from datetime import datetime
 from threading import Thread
 from itertools import repeat
+from pathlib import Path
 import sqlite3 as sqlite3
 import pandas as pd
 import os as os
@@ -148,12 +149,14 @@ class Worker(Thread):
         # 3.5 后处理
         df_o = df_o.drop(['udate'], axis=1)
         df5 = pd.concat([df_o, df4_1], axis=1)
-        path_3 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'production', 'nq-prediction-production.csv'))
-        if os.path.exists(path_3):
-            os.remove(path_3)
+        path3_1 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'production'))
+        Path(path3_1).mkdir(parents=True, exist_ok=True)
         df6 = df5.loc[(df5['t1'] > 0)]
         df7 = pd.concat([df5.head(window_size), df6], axis=0, join='outer', ignore_index=False, keys=None, levels=None, names=None, verify_integrity=False, copy=True)
-        df7.to_csv(path_3)
+        path3_2 = os.path.abspath(os.path.join(path3_1, 'nq-prediction-production.csv'))
+        if os.path.exists(path3_2):
+            os.remove(path3_2)
+        df7.to_csv(path3_2)
         return df7
 
     # 4.0 买卖策略
