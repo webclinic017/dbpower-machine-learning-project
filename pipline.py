@@ -185,6 +185,9 @@ class Worker(Thread):
             df3 = self.run_model(df=df2, df_o=df, prefix1='nq-lstm', prefix2='20201214-142731')
             # 4.0 买卖策略
             df4 = self.algo2()
+            # 5.0
+            res5_1 = requests.get(url='http://127.0.0.1:84/list-orders')
+            res5_2 = requests.get(url='http://127.0.0.1:84/list-trades')
         except:
             pass
 
