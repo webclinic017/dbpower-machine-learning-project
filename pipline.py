@@ -12,12 +12,15 @@ import time as time1
 import joblib as joblib
 import tensorflow as tf
 import requests as requests
+import urllib as urllib
+import json as json
 
 pd.options.mode.chained_assignment = None
 np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
 my_devices = tf.config.experimental.list_physical_devices(device_type='CPU')
 tf.config.experimental.set_visible_devices(devices= my_devices, device_type='CPU')
+path_ib = 'http://127.0.0.1:84'
 
 
 class Worker(Thread):
@@ -161,18 +164,27 @@ class Worker(Thread):
 
     # 4.0 买卖策略
     def algo2(self):
-        df4 = common.algo(file1='production', file2='nq-prediction-production', direction='long', vol=0.05, vol2=0.00, cutloss=2.00, is_adjust=False, minutes=5)
+        df4 = common.algo(file1='production', file2='nq-prediction-production', direction='long', vol=0.08, vol2=0.00, cutloss=2.00, is_adjust=False, minutes=5)
         cur_action = df4.iloc[-1]['action']
         params = {'side': None, 'quantity': '1', 'symbol': 'NQ', 'exchange': 'GLOBEX'}
-        if cur_action in ['buy']:
+
+        # 4.1
+        with urllib.request.urlopen(path_ib+'/list-positions') as url:
+            data = json.loads(url.read().decode())
+            if data and data[0]['position'] >= 1:
+                is_holding = True
+            else:
+                is_holding = False
+
+        # 4.2
+        if cur_action in ['buy'] and not is_holding:
             params['side'] = 'buy'
-            res = requests.get(url='http://127.0.0.1:84/place-market-order', params=params)
-            print(params)
-            print(res.json())
-        elif cur_action in ['sell', 'cut',  'cut overnight']:
+        elif cur_action in ['sell', 'cut',  'cut overnight'] and is_holding:
             params['side'] = 'sell'
-            res = requests.get(url='http://127.0.0.1:84/place-market-order', params=params)
-            print(params)
+
+        # 4.3
+        if params['side'] is not None:
+            res = requests.get(url=path_ib+'/place-market-order', params=params)
             print(res.json())
         return df4
 
@@ -189,8 +201,8 @@ class Worker(Thread):
             # 4.0 买卖策略
             df4 = self.algo2()
             # 5.0
-            res5_1 = requests.get(url='http://127.0.0.1:84/list-orders')
-            res5_2 = requests.get(url='http://127.0.0.1:84/list-trades')
+            res5_1 = requests.get(url=path_ib+'/list-orders')
+            res5_2 = requests.get(url=path_ib+'/list-trades')
         except:
             pass
 
