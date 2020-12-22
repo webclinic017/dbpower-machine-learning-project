@@ -103,8 +103,9 @@ class ListOrders(tornado.web.RequestHandler):
         df = pd.DataFrame(data=data)
         df['trailStopPrice'] = 0.0
         data2 = [v.values.tolist() for k, v in df.iterrows()]
-        cursor.executemany("""replace into ib_order (account, permId, refFuturesConId, action, orderType, filledQuantity, 
-        lmtPrice, trailStopPrice, parentPermId) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""", data2)
+        if data2:
+            cursor.executemany("""replace into ib_order (account, permId, refFuturesConId, action, orderType, 
+            filledQuantity, lmtPrice, trailStopPrice, parentPermId) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""", data2)
         db.commit()
         cursor.close()
         db.close()
@@ -149,7 +150,8 @@ class ListTrades(tornado.web.RequestHandler):
         # save db 2
         db = sqlite3.connect(path_db)
         cursor = db.cursor()
-        cursor.executemany("replace into ib_trade ("+keys2_2+") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data2_2)
+        if keys2_2 and data2_2:
+            cursor.executemany("replace into ib_trade ("+keys2_2+") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data2_2)
         db.commit()
         cursor.close()
         db.close()
