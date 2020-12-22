@@ -6,3 +6,17 @@ logs/
 min_max_scaler/
 saved_model/
 training_checkpoints/
+
+data/nq/result-describe/
+data/nq/prediction/
+data/nq/clean-data/
+data/nq/data/nq.db
+
+data/img-nq/results
+data/img-nq/prediction
+data/img-nq/features
+
+data/images/
+data/hk/
+
+*.db
