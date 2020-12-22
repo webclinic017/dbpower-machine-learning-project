@@ -128,10 +128,10 @@ cd bin/x86_64/linux/release
 ./deviceQuery</code></pre>
 
 啟動
-<pre><code class="powershell">sudo jupyter lab --ip=0.0.0.0 --port=80 --allow-root --NotebookApp.iopub_data_rate_limit=1.0e10
-sudo tensorboard --logdir logs/fit/ --port=81 --host=0.0.0.0
-sudo python3 web-server-dev.py
-sudo python3 web-server-client.py</code></pre>
+<pre><code class="powershell">sudo ./venv/bin/jupyter lab --ip=0.0.0.0 --port=80 --allow-root --NotebookApp.iopub_data_rate_limit=1.0e10
+sudo ./venv/bin/tensorboard --logdir logs/fit/ --port=81 --host=0.0.0.0
+sudo ./venv/bin/python3 web-server-dev.py
+sudo ./venv/bin/python3 web-server-client.py</code></pre>
 
 (可能有用的)依賴庫
 <pre><code class="powershell">sudo apt-get install python3.7-dev 
@@ -144,21 +144,30 @@ TA-lib
 <pre><code class="powershell">pip install https://github.com/matplotlib/mpl_finance/archive/master.zip</code></pre>
 
 設置venv
-<pre><code class="powershell"># unset irrelevant variables
-deactivate nondestructive
-
-VIRTUAL_ENV="/home/user/PycharmProjects/JupyterLab01/venv"
-export VIRTUAL_ENV
-
-_OLD_VIRTUAL_PATH="$PATH"
-PATH="$VIRTUAL_ENV/bin:$PATH"
-export PATH
-
-# 設置路徑
+<pre><code class="powershell"># 設置路徑
 export PATH=/usr/local/cuda-10.2/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 # 手動鏈接庫
 sudo ln -s /usr/local/cuda-10.2/targets/x86_64-linux/lib/libcudart.so.10.2 /usr/lib/x86_64-linux-gnu/libcudart.so.10.1</code></pre>
+
+<pre><code class="powershell"># 設置路徑
+export PATH=/usr/local/cuda-11.1/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+# 手動鏈接庫
+sudo rm /usr/lib/x86_64-linux-gnu/libcusolver.so.10
+sudo ln -s /usr/local/cuda-11.1/targets/x86_64-linux/lib/libcusolver.so.11 /usr/lib/x86_64-linux-gnu/libcusolver.so.10</code></pre>
+
+查詢路徑
+<pre><code class="powershell">python3 -c "import sys; print(sys.path)"
+sudo python3 -c "import sys; print(sys.path)"</code></pre>
+
+vnc
+<pre><code class="powershell">#!/bin/bash
+xrdb $HOME/.Xresources
+vncconfig -iconic &
+autocutsel -s CLIPBOARD -fork &
+startxfce4 &</code></pre>
+
 
 </div>
 </div>
