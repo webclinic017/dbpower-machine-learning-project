@@ -130,8 +130,9 @@ cd bin/x86_64/linux/release
 啟動
 <pre><code class="powershell">sudo ./venv/bin/jupyter lab --ip=0.0.0.0 --port=80 --allow-root --NotebookApp.iopub_data_rate_limit=1.0e10
 sudo ./venv/bin/tensorboard --logdir logs/fit/ --port=81 --host=0.0.0.0
-sudo ./venv/bin/python3 web-server-dev.py
-sudo ./venv/bin/python3 web-server-client.py</code></pre>
+sudo ./venv/bin/python web-server-dev.py
+sudo ./venv/bin/python web-server-client.py
+sudo ./venv/bin/python market-data.py</code></pre>
 
 (可能有用的)依賴庫
 <pre><code class="powershell">sudo apt-get install python3.7-dev 
@@ -140,8 +141,17 @@ sudo apt-get install libsqlclient-dev
 sudo apt-get install libmysqlclient-dev
 sudo apt-get install libssl-dev</code></pre>
 
-TA-lib
+mpl_finance
 <pre><code class="powershell">pip install https://github.com/matplotlib/mpl_finance/archive/master.zip</code></pre>
+
+TA-lib
+<pre><code class="powershell">tar -xzf ta-lib-0.4.0-src.tar.gz
+cd ta-lib/
+./configure --prefix=/usr
+make
+sudo make install
+sudo apt upgrade
+pip install TA-Lib</code></pre>
 
 設置venv
 <pre><code class="powershell"># 設置路徑
@@ -168,6 +178,9 @@ vncconfig -iconic &
 autocutsel -s CLIPBOARD -fork &
 startxfce4 &</code></pre>
 
+<a target="_blank" href="https://aur.archlinux.org/packages/github-desktop-bin/">github desktop</a><br />
+<pre><code class="powershell">sudo apt install gnome-keyring
+sudo dpkg -i GitHubDesktop-linux-2.5.7-linux1.deb</code></pre>
 
 </div>
 </div>
