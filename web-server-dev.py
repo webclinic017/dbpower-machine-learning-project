@@ -56,7 +56,7 @@ def result_describe():
 @app.route('/prediction', methods=['GET', 'POST'])
 def prediction():
     file_2 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'nq-prediction.csv'))
-    df2 = pd.read_csv(file_2).tail(40*8)
+    df2 = pd.read_csv(file_2).tail(20000)
     return render_template('./prediction.html', data=df2.to_html(classes='table table-sm table-striped', index=False).replace('border="1"','border="0"'))
 
 @app.route('/markdown', methods=['GET', 'POST'])
