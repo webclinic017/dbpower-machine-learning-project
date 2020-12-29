@@ -52,8 +52,9 @@ while True:
     try:
         cur_second = datetime.today().second
         # 每隔5秒
-        if cur_second % 5 == 0:
+        if cur_second % 15 == 0:
             df1 = get_date(df1, cur_second)
         time.sleep(1)
     except:
         print('Except: {}'.format(datetime.today().strftime("%Y-%m-%d %H:%M:%S")))
+        time.sleep(1)
