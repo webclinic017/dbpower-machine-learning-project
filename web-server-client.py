@@ -6,7 +6,6 @@ import os as os
 import numpy as np
 import json as json
 import common as common
-import tensorflow as tf
 
 pd.options.mode.chained_assignment = None
 np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
@@ -25,19 +24,23 @@ def index():
 @app.route('/result', methods=['GET', 'POST'])
 def result():
     # 1.0 传叁
-    file1 = request.form.get('file1') # 文件1
-    file2 = request.form.get('file2') # 文件2
-    direction = request.form.get('direction') # 方向
-    vol = float(request.form.get('vol'))  # 买卖波幅
-    vol2 = float(request.form.get('vol2'))  # 止蚀波幅
-    cutloss = float(request.form.get('cutLoss'))  # 止蚀
-    is_adjust = False if request.form.get('adjection')=='false' else True # 调整
-    minutes = int(request.form.get('minutes')) # 预测x分钟后
+    file1 = request.form.get('file1')               # 文件1
+    file2 = request.form.get('file2')               # 文件2
+    direction = request.form.get('direction')       # 方向
+    vol = float(request.form.get('vol'))            # 买卖波幅
+    vol2 = float(request.form.get('vol2'))          # 止蚀波幅
+    cutloss = float(request.form.get('cutLoss'))    # 止蚀
+    is_adjust = False if request.form.get('adjection')=='false' else True   # 调整
+    is_show_all = False if request.form.get('isShowAll')=='false' else True # 顯示全部
+    minutes = int(request.form.get('minutes'))  # 预测x分钟后
     
     df5 = common.algo(file1, file2, direction, vol, vol2, cutloss, is_adjust, minutes)
 
     # 5.0 渲染1
-    df6 = df5.loc[(df5['action']=='buy') | (df5['action']=='sell') | (df5['action']=='cut') | (df5['action']=='cut overnight')]
+    if not is_show_all:
+        df6 = df5.loc[(df5['action']=='buy') | (df5['action']=='sell') | (df5['action']=='cut') | (df5['action']=='cut overnight')]
+    else:
+        df6 = df5.copy(deep=True)
     df6['cash'] = df6['cash'].round(4)
     df6['profit'] = df6['profit'].round(2)
 
@@ -61,19 +64,20 @@ def result():
     hold_time_avg = (df6['hold time'].sum()/no_trade).round(0)
 
     # 5.2 加颜色
-    for k5, v5 in df6.iterrows():
+    df7 = df6.copy(deep=True)
+    for k5, v5 in df7.iterrows():
         # 5.3 profit
-        if df6.loc[k5, 'profit'] > 0:
-            df6.loc[k5, 'profit'] = '<font class="text-danger">+'+str(df6.loc[k5, 'profit'])+'</font>'
-        elif df6.loc[k5, 'profit'] <= 0:
-            df6.loc[k5, 'profit'] = '<font class="text-success">'+str(df6.loc[k5, 'profit'])+'</font>'
+        if v5['profit'] > 0:
+            df7.loc[k5, 'profit'] = '<font class="text-danger">+'+str(df7.loc[k5, 'profit'])+'</font>'
+        elif v5['profit'] <= 0:
+            df7.loc[k5, 'profit'] = '<font class="text-success">'+str(df7.loc[k5, 'profit'])+'</font>'
         # 5.4 cash
-        if df6.loc[k5, 'cash'] > 0:
-            df6.loc[k5, 'cash'] = '<font class="text-danger">+'+str(df6.loc[k5, 'cash'])+'</font>'
-        elif df6.loc[k5, 'cash'] <= 0:
-            df6.loc[k5, 'cash'] = '<font class="text-success">'+str(df6.loc[k5, 'cash'])+'</font>'
-    df6.sort_index(ascending=False, inplace=True)
-    html = df6.to_html(classes='table table-sm table-striped', index=False, escape=False, border=0, justify='left').replace('border="1"', 'border="0"').replace('NaN', '')
+        if v5['cash'] > 0:
+            df7.loc[k5, 'cash'] = '<font class="text-danger">+'+str(df7.loc[k5, 'cash'])+'</font>'
+        elif v5['cash'] <= 0:
+            df7.loc[k5, 'cash'] = '<font class="text-success">'+str(df7.loc[k5, 'cash'])+'</font>'
+    df7.sort_index(ascending=True, inplace=True)
+    html = df7.to_html(classes='table table-sm table-striped', index=False, escape=False, border=0, justify='left').replace('border="1"', 'border="0"').replace('NaN', '')
     data4 = {'total_profit': total_profit, 'avg_profit': avg_profit, 'max_win': max_win, 'max_loss': max_loss,
              'no_trade': no_trade, 'no_win': no_win, 'no_loss': no_loss, 'no_cut_loss': no_cut_loss, 'avg_no_trade': avg_no_trade, 'no_total_day': no_total_day, 
              'hold_time_max': hold_time_max, 'hold_time_min': hold_time_min, 'hold_time_avg': hold_time_avg,
