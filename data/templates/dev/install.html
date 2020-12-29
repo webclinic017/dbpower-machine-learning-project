@@ -132,7 +132,8 @@ cd bin/x86_64/linux/release
 sudo ./venv/bin/tensorboard --logdir logs/fit/ --port=81 --host=0.0.0.0
 sudo ./venv/bin/python web-server-dev.py
 sudo ./venv/bin/python web-server-client.py
-sudo ./venv/bin/python market-data.py</code></pre>
+sudo ./venv/bin/python market-data.py
+sudo ./venv/bin/jupyter nbconvert --to script nq9.ipynb</code></pre>
 
 (可能有用的)依賴庫
 <pre><code class="powershell">sudo apt-get install python3.7-dev 
@@ -181,6 +182,10 @@ startxfce4 &</code></pre>
 <a target="_blank" href="https://aur.archlinux.org/packages/github-desktop-bin/">github desktop</a><br />
 <pre><code class="powershell">sudo apt install gnome-keyring
 sudo dpkg -i GitHubDesktop-linux-2.5.7-linux1.deb</code></pre>
+
+set default python3 
+<pre><code class="powershell">sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+sudo update-alternatives --config python3</code></pre>
 
 </div>
 </div>
