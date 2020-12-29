@@ -2,9 +2,20 @@
 <head>{% include 'header.html' %}</head>
 <script>
 var ui = {};
-function initUI() {}
+function initUI() {
+  ui.aDownload = $('#download-link');
+}
 $(document).ready(function() {
   initUI();
+
+  ui.aDownload.attr('href', './nq/prediction/nq-prediction.csv');
+
+  $('.dataframe').DataTable({
+    order: [[0, "desc"]],
+    paging: true,
+    pageLength: 1000,
+    lengthMenu: [250, 500, 750, 1000],
+  });
 });
 </script>
 <style>
@@ -17,6 +28,8 @@ $(document).ready(function() {
 <div class="row">
 <div class="col-12 col-sm-12">
 <div class="body-container">
+  <a id="download-link" href="javascript:void(0);">Download csv</a>
+  <br /><br />
   {{ data | safe }}
 </div>
 </div>
