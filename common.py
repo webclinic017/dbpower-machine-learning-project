@@ -120,7 +120,12 @@ def algo(file1, file2, direction, vol, vol2, cutloss, is_adjust, minutes):
         if v1['udate'].hour <= 14 or v1['udate'].hour >= 19:
             # 时间
             cur_time, close_time = time(v1.udate.hour, v1.udate.minute, 0), time(14, 59, 0)
-            is_over_night = (cur_time == close_time) # 过夜
+            if cur_time == close_time:  # 周2~5过夜
+                is_over_night = True
+            elif v1['udate'].weekday() == 0 and cur_time == time(9, 59, 0):  # 周1过夜
+                is_over_night = True
+            else:
+                is_over_night = False
             # 3.2 买入
             if is_trigger(v1, vol) and not is_over_night and not holding:
                 holding = True
