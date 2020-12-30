@@ -3,8 +3,20 @@ import pandas as pd
 import numpy as np
 import os as os
 import talib as talib
+import math as math
 from datetime import datetime, timedelta, date, time
 
+def HMA(close,period):
+    wma1 = talib.EMA(close,period);
+    wma2 = talib.EMA(close,period/2);
+    wma3 = []
+    for i in range(len(close)):
+        if wma1[i] > 0 and wma2[i]>0:
+            wma3.append(2*wma2[i]-wma1[i])
+        else:
+            wma3.append(None)
+    wma4 = np.array(wma3, dtype='float')  
+    return talib.EMA(wma4, math.sqrt(period))
 
 def percentB_belowzero(percentB, price):
     signal   = []
