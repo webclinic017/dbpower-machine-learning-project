@@ -23,7 +23,18 @@ gpus = tf.config.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 
+# 0.0 ib
 path_ib = 'http://127.0.0.1:84'
+# 0.1 model
+prefix1 = 'nq-lstm'
+prefix2 = '20201214-142731'
+# 0.2 algo
+direction = 'long'
+vol = 0.08
+vol2 = 0.00
+cutloss=2.00
+is_adjust = False
+minutes = 5
 
 
 class Worker(Thread):
@@ -48,6 +59,7 @@ class Worker(Thread):
         df2.astype(types1).dtypes
         df2.udate = pd.to_datetime(df2.udate)
         df2.index = pd.to_datetime(df2.udate)
+        # df2_2 = df2.loc[(df2['udate'] <= datetime(2020, 12, 18, 4, 41, 0))] # 时间拦截器
         return df2
 
     # 2.0 技术指标
@@ -82,7 +94,7 @@ class Worker(Thread):
         return df
 
     # 3.0 预测模型
-    def run_model(self, df, df_o, prefix1, prefix2):
+    def run_model(self, df, df_o):
         # 3.1 正则化
         path_name = os.path.abspath(os.path.join('min_max_scaler', prefix1 + '-' + prefix2 + '.pkl'))
         scalers = joblib.load(path_name)
@@ -121,7 +133,7 @@ class Worker(Thread):
                 # 5.5.5 分集2
                 elif not x_valid.any():
                     x_valid = x_data
-        print('X_Valid Data: {}, Date_Valid: {}'.format(x_valid.shape, np.array(date_valid).shape), date_valid[-1])
+        print('X_Valid:{} Date_Valid:{}'.format(x_valid.shape, np.array(date_valid).shape), date_valid[-1][0])
 
         # 3.3 模型
         path_model = os.path.abspath(os.path.join('saved_model', prefix1 + '-' + prefix2 + '.h5'))
@@ -167,11 +179,13 @@ class Worker(Thread):
 
     # 4.0 买卖策略
     def algo2(self):
-        df4 = common.algo(file1='production', file2='nq-prediction-production', direction='long', vol=0.08, vol2=0.00, cutloss=2.00, is_adjust=False, minutes=5)
-        cur_action = df4.iloc[-1]['action']
-        params = {'side': None, 'quantity': '1', 'symbol': 'NQ', 'exchange': 'GLOBEX'}
-
         # 4.1
+        df4 = common.algo(file1='production', file2='nq-prediction-production', direction=direction, vol=vol, vol2=vol2, cutloss=cutloss, is_adjust=is_adjust, minutes=minutes)
+        cur_action = df4.iloc[-1]['action']
+        model = prefix1+'-'+prefix2
+        params = {'side': None, 'quantity': '1', 'symbol': 'NQ', 'exchange': 'GLOBEX', 'model': model, 'direction': direction}
+
+        # 4.2
         with urllib.request.urlopen(path_ib+'/list-positions') as url:
             data = json.loads(url.read().decode())
             if data and data[0]['position'] >= 1:
@@ -179,45 +193,58 @@ class Worker(Thread):
             else:
                 is_holding = False
 
-        # 4.2
+        # 4.3
         if cur_action in ['buy'] and not is_holding:
             params['side'] = 'buy'
         elif cur_action in ['sell', 'cut',  'cut overnight'] and is_holding:
             params['side'] = 'sell'
 
-        # 4.3
+        # 4.4
         if params['side'] is not None:
             res = requests.get(url=path_ib+'/place-market-order', params=params)
             print(res.json())
-        return df4
+        return params
+    
+    # 5.0 儲存紀錄
+    def postProcess(self, start):
+        # 5.1
+        end = datetime.now()
+        used_time = round((end-start).total_seconds(), 2)
+        # 5.2
+        path_db = os.path.abspath(os.path.join('data', 'ib', 'pipeline.db'))
+        db = sqlite3.connect(path_db)
+        cursor = db.cursor()
+        data1 = [str(direction), str(vol), str(vol2), str(cutloss), str(is_adjust), str(minutes)]
+        data2 = [prefix1+'-'+prefix2, start.strftime("%Y-%m-%d %H:%M:%S"), end.strftime("%Y-%m-%d %H:%M:%S"), used_time, '|'.join(data1)]
+        cursor.execute("insert into train (model, start_time, end_time, used_time, algo_params) VALUES (?, ?, ?, ?, ?)", data2)
+        db.commit()
+        cursor.close()
+        db.close()
+        # 5.3
+        res5_1 = requests.get(url=path_ib+'/list-orders')
+        res5_2 = requests.get(url=path_ib+'/list-trades')
 
     def do(self):
         try:
             start = datetime.now()
             # 1.0 抓取数据
             df = self.get_data(no_day=4)
-            # df = df.loc[(df['udate'] <= datetime(2020, 12, 18, 4, 41, 0))] # 时间拦截器
             # 2.0 技术指标
             df2 = df.copy(deep=True)
             df2 = self.get_ta(df2)
             # 3.0 预测模型
-            df3 = self.run_model(df=df2, df_o=df, prefix1='nq-lstm', prefix2='20201214-142731')
+            df3 = self.run_model(df=df2, df_o=df)
             # 4.0 买卖策略
-            df4 = self.algo2()
-            # 5.0
-            res5_1 = requests.get(url=path_ib+'/list-orders')
-            res5_2 = requests.get(url=path_ib+'/list-trades')
-            # 6.0
-            end = datetime.now()
-            used_time = round((end-start).total_seconds(), 2)
-            print('Start:{}  End:{}  Used:{}'.format(start.strftime("%Y/%m/%d %H:%M:%S"), end.strftime("%Y/%m/%d %H:%M:%S"), used_time))
+            params = self.algo2()
+            # 5.0 儲存紀錄
+            self.postProcess(start)
         except:
             pass
 
     def run(self):
         while True:
             cur_minute, cur_second = datetime.today().minute, datetime.today().second
-            if cur_second == 6:
+            if cur_second == 1:
                 self.do()
             time1.sleep(1)
 

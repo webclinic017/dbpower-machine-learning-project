@@ -63,7 +63,7 @@ def result_describe():
 @app.route('/prediction', methods=['GET', 'POST'])
 def prediction():
     file_2 = os.path.abspath(os.path.join('data', 'nq', 'prediction', 'nq-prediction.csv'))
-    df2 = pd.read_csv(file_2).tail(20000)
+    df2 = pd.read_csv(file_2).tail(2500)
     return render_template('./prediction.html', data=df2.to_html(classes='table table-sm table-striped', index=False).replace('border="1"','border="0"'))
 
 @app.route('/markdown', methods=['GET', 'POST'])
@@ -175,6 +175,17 @@ def files():
     for k in sorted(data, reverse=True):
         data2[k] = data[k]
     return json.dumps(data2)
+
+@app.route('/paper-trade-runtime', methods=['GET', 'POST'])
+def paperTradeRuntime():
+    path_db = os.path.abspath(os.path.join('data', 'ib', 'pipeline.db'))
+    db = sqlite3.connect(path_db)
+    cursor = db.cursor()
+    df1 = pd.read_sql_query("select * from train order by id desc limit 1000", db)
+    db.commit()
+    cursor.close()
+    db.close()
+    return render_template('./paper-trade-runtime.html', data=df1.head(100).to_html(classes='table table-sm table-striped', index=False, justify='left', border=0).replace('None', '/'))
 
 if __name__ == '__main__':
     app.debug = True
