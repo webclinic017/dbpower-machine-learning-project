@@ -14,12 +14,15 @@ import tensorflow as tf
 import requests as requests
 import urllib as urllib
 import json as json
+import datetime as dt
 
 pd.options.mode.chained_assignment = None
 np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
-my_devices = tf.config.experimental.list_physical_devices(device_type='CPU')
-tf.config.experimental.set_visible_devices(devices= my_devices, device_type='CPU')
+gpus = tf.config.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
+
 path_ib = 'http://127.0.0.1:84'
 
 
@@ -118,7 +121,7 @@ class Worker(Thread):
                 # 5.5.5 分集2
                 elif not x_valid.any():
                     x_valid = x_data
-        print('验证集: X_Valid Data: {}, Date_Valid: {}'.format(x_valid.shape, np.array(date_valid).shape), date_valid[-1])
+        print('X_Valid Data: {}, Date_Valid: {}'.format(x_valid.shape, np.array(date_valid).shape), date_valid[-1])
 
         # 3.3 模型
         path_model = os.path.abspath(os.path.join('saved_model', prefix1 + '-' + prefix2 + '.h5'))
@@ -190,6 +193,7 @@ class Worker(Thread):
 
     def do(self):
         try:
+            start = datetime.now()
             # 1.0 抓取数据
             df = self.get_data(no_day=4)
             # df = df.loc[(df['udate'] <= datetime(2020, 12, 18, 4, 41, 0))] # 时间拦截器
@@ -203,6 +207,10 @@ class Worker(Thread):
             # 5.0
             res5_1 = requests.get(url=path_ib+'/list-orders')
             res5_2 = requests.get(url=path_ib+'/list-trades')
+            # 6.0
+            end = datetime.now()
+            used_time = round((end-start).total_seconds(), 2)
+            print('Start:{}  End:{}  Used:{}'.format(start.strftime("%Y/%m/%d %H:%M:%S"), end.strftime("%Y/%m/%d %H:%M:%S"), used_time))
         except:
             pass
 
