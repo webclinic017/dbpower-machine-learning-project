@@ -7,8 +7,8 @@ import math as math
 from datetime import datetime, timedelta, date, time
 
 def HMA(close,period):
-    wma1 = talib.EMA(close,period);
-    wma2 = talib.EMA(close,period/2);
+    wma1 = talib.WMA(close,period);
+    wma2 = talib.WMA(close,period/2);
     wma3 = []
     for i in range(len(close)):
         if wma1[i] > 0 and wma2[i]>0:
@@ -16,7 +16,7 @@ def HMA(close,period):
         else:
             wma3.append(None)
     wma4 = np.array(wma3, dtype='float')  
-    return talib.EMA(wma4, math.sqrt(period))
+    return talib.WMA(wma4, math.sqrt(period))
 
 def percentB_belowzero(percentB, price):
     signal   = []
