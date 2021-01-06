@@ -1,0 +1,107 @@
+<html>
+<head>{% include 'header.html' %}</head>
+<script>
+var ui = {};
+function initUI() {
+ ui.cxt1 = $('#cxt1');
+}
+$(document).ready(function() {
+  initUI();
+  document.title = 'TCP Socket';
+  
+  var url = 'http://127.0.0.1';
+  var port = '83';
+  var socket = io.connect(url+':'+port);
+
+  socket.on('connect', function() {
+    socket.emit('receive', 'connect......');
+  });
+  
+  socket.on('receive2', function(data) {
+    try {
+      var dv = new DataView(data);
+      var header = 0;
+      var v1 = dv.getUint16(header, true);
+      var v2 = dv.getUint16(header+=2, true);
+      var v3 = dv.getUint16(header+=2, true);
+      var v4 = dv.getUint16(header+=2, true);
+      
+      var buf = [];
+      for (var i=0; i<=8; i++) {
+        var temp = dv.getUint16(header+=2, true)
+        if (temp>0) buf.push(temp);
+      }
+      var enc = new TextDecoder('iso-8859-2');
+      var v5 = enc.decode(new Uint16Array(buf));
+      
+      if (v4 == 201) {
+        var v6 = dv.getInt32(header+=4, true); 
+        var v6_1 = v6.toString().slice(0, -4);
+        var v6_2 = v6.toString().substr(v6.toString().length - 4); 
+        var v6_3 = parseFloat(v6_1+'.'+v6_2);
+        
+        var v7 = dv.getInt32(header+=4, true);
+        var v7_1 = v7.toString().slice(0, -4);
+        var v7_2 = v7.toString().substr(v7.toString().length - 4); 
+        var v7_3 = parseFloat(v7_1+'.'+v7_2);
+        
+        var v8 = dv.getInt32(header, true);
+        
+        var v9 = dv.getBigInt64(header+=4, true);
+        var v10 = dv.getBigInt64(header+=8, true);
+        var v11 = dv.getBigInt64(header+=8, true);
+        var v11_1 = v11.toString().slice(0, 10);
+        
+        function timeConverter(UNIX_timestamp){
+          var a = new Date(UNIX_timestamp * 1000);
+          var year = a.getFullYear();
+          var month = a.getMonth()+1;
+          var date = a.getDate();
+          var hour = a.getHours();
+          var min = a.getMinutes();
+          var sec = a.getSeconds();
+          function padStart2(d, p) { return d.toString().padStart(p, '0'); }
+          return year+'-'+padStart2(month, 2)+'-'+padStart2(date, 2)+' '+padStart2(hour, 2)+':'+padStart2(min, 2)+':'+padStart2(sec, 2);
+        }
+        var v11_2 = timeConverter(v11_1);
+        
+        ui.cxt1.html('omd_size: '+v1+'<br /> omd_type: '+ v2+'<br /> dbp_size: '+ v3+'<br /> dbp_type: '+ v4+'<br /> code: '+ v5+'<br /> best_bid: '+ v6_3+'<br /> best_ask: '+ v7_3+'<br /> best_bid_vol: '+ v9+'<br /> best_ask_vol: '+ v10+'<br /> datetime: '+ v11_2);
+        console.log(v1, v2, v3, v4, v5, v6_3, v7_3, v9, v10, v11_2);
+      }
+    }
+    catch(err) {
+      // console.log(err);
+    }
+  });
+  
+});
+</script>
+<style>
+.nav-item {margin-right: 6px;}
+.navbar-light .navbar-brand {font-size: 18px;}
+.navbar-light .navbar-nav .nav-link, .dropdown-item {font-size: 14px;}
+</style>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container">
+  <a class="navbar-brand mb-0 h1" href="../">TCP Socket</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+  <span class="navbar-toggler-icon"></span>
+  </button>
+</nav>
+<div class="header-btm"></div>
+
+<div class="container">
+
+<div class="row">
+<div class="col-sm-12">
+<div id="cxt1" class="body-container">
+
+</div>
+</div>
+</div>
+
+</div>
+</body>
+<html>
