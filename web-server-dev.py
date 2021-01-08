@@ -39,6 +39,15 @@ def chart():
     files_name.sort(reverse=False)
     return render_template('./chart.html', files_name=files_name)
 
+@app.route('/height-map', methods=['GET', 'POST'])
+def height_map():
+    data = {}
+    for root, dirs, files in walk(os.path.abspath(os.path.join('data', 'img-nq', 'heightmap'))):
+        if not dirs:
+            data[os.path.basename(os.path.normpath(root))] = [file.replace('.png', '') for file in sorted(files)]
+    last = sorted(data, reverse=True)[0]
+    return render_template('./height-map.html', data1=last, data2=data[last][0:200])
+
 @app.route('/result', methods=['GET', 'POST'])
 def result():
     path_chart = os.path.join(static_folder, 'img-nq', 'results')
