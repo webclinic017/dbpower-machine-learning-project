@@ -1,0 +1,28 @@
+<html>
+<head>{% include 'header.html' %}</head>
+<script>
+var ui = {};
+function initUI() {}
+$(document).ready(function() {
+  initUI();
+});
+</script>
+<style>
+.container-body img {width: 100%;}
+</style>
+<body>
+{% include 'navbar.html' %}
+<div class="container-fluid" style="width: 98%">
+    
+<div class="row body-container">
+{% for file in data2 %}
+  <div class="col-6 col-sm-3" style="padding: 0px;">
+    {{ file }}
+    <img src="./img-nq/heightmap/{{ data1 }}/{{ file }}.png">
+  </div>
+{% endfor %}
+</div>
+
+</div>
+</body>
+<html>
