@@ -15,6 +15,7 @@ data/nq/data/nq.db
 data/img-nq/results
 data/img-nq/prediction
 data/img-nq/features
+data/img-nq/heightmap
 
 data/images/
 data/hk/
