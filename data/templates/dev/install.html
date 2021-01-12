@@ -20,6 +20,9 @@ $(document).ready(function() {
 
 <h6>Installation Guide</h6><br />
 
+key
+<pre><code class="powershell">7834b3cf17b1c505c6343a55ac94af5174edb00b</code></pre>
+
 解压
 <pre><code class="powershell">sudo tar -xzf pycharm-community-2020.3.tar.gz</code></pre>
 
@@ -178,6 +181,12 @@ xrdb $HOME/.Xresources
 vncconfig -iconic &
 autocutsel -s CLIPBOARD -fork &
 startxfce4 &</code></pre>
+
+vnc close
+<pre><code class="powershell">sudo vncserver -kill :1</code></pre>
+
+vnc start
+<pre><code class="powershell">vncserver :1</code></pre>
 
 <a target="_blank" href="https://aur.archlinux.org/packages/github-desktop-bin/">github desktop</a><br />
 <pre><code class="powershell">sudo apt install gnome-keyring
