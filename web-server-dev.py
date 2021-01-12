@@ -46,7 +46,7 @@ def height_map():
         if not dirs:
             data[os.path.basename(os.path.normpath(root))] = [file.replace('.png', '') for file in sorted(files)]
     last = sorted(data, reverse=True)[0]
-    return render_template('./height-map.html', data1=last, data2=data[last][0:200])
+    return render_template('./height-map.html', data1=last, data2=data[last])
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
