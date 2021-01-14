@@ -41,7 +41,7 @@ def percentB_aboveone(percentB, price):
     return signal
 
 def kdj(high, low, close, window_size):
-    slowk, slowd = talib.STOCH(high, low, close, fastk_period=5*window_size, slowk_period=3*window_size, slowk_matype=0, slowd_period=3*window_size, slowd_matype=0)
+    slowk, slowd = talib.STOCH(high, low, close, fastk_period=9*window_size, slowk_period=3*window_size, slowk_matype=0, slowd_period=3*window_size, slowd_matype=0)
     slowj = list(map(lambda x,y: 3 * x - 2 * y, slowk, slowd))
     return slowk, slowd, slowj
 
