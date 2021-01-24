@@ -1,0 +1,47 @@
+<html>
+<head>{% include 'header.html' %}</head>
+<script>
+var ui = {};
+function initUI() {
+  ui.imgAnimation = $('#animation');
+}
+$(document).ready(function() {
+  initUI();
+  
+  var imgs = [{% for file in data2 %}'{{ file }}',{% endfor %}];
+  var min = 0;
+  var max = imgs.length;
+  var cur = min;
+  function animation() {
+    ui.imgAnimation.attr('src', './img-nq/heightmap/{{ data1 }}/'+imgs[cur]+'.png');
+    if (cur++ > max) cur = min;
+    window.setTimeout(animation, 100);
+  }
+  animation();
+});
+</script>
+<style>
+.container-body img {width: 100%;}
+</style>
+<body>
+{% include 'navbar.html' %}
+<div class="container-fluid" style="width: 98%">
+
+<div class="row body-container">
+  <div class="col-6 col-sm-3" style="padding: 0px;">
+    <img id="animation" src="">
+  </div>
+</div>
+    
+<div class="row body-container">
+{% for file in data2 %}
+  <div class="col-6 col-sm-3" style="padding: 0px;">
+    {{ file }}
+    <img src="./img-nq/heightmap/{{ data1 }}/{{ file }}.png">
+  </div>
+{% endfor %}
+</div>
+
+</div>
+</body>
+<html>

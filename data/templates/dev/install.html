@@ -20,6 +20,12 @@ $(document).ready(function() {
 
 <h6>Installation Guide</h6><br />
 
+key
+<pre><code class="powershell">7834b3cf17b1c505c6343a55ac94af5174edb00b</code></pre>
+
+解压
+<pre><code class="powershell">sudo tar -xzf pycharm-community-2020.3.tar.gz</code></pre>
+
 下載
 <pre><code class="powershell">curl –O [URL]</code></pre>
 
@@ -117,11 +123,20 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PAT
 <a target="_blank" href="https://docs.nvidia.com/deeplearning/frameworks/tensorflow-release-notes/rel_20-08.html#rel_20-08">Tensorflow-release-notes</a><br />
 <a target="_blank" href="https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html">Docker container</a><br /><br />
 
+<strong>测试 cuda</strong><br />
+<pre><code class="powershell">git clone https://github.com/NVIDIA/cuda-samples
+cd cuda-samples
+sudo make all -j8
+cd bin/x86_64/linux/release
+./deviceQuery</code></pre>
+
 啟動
-<pre><code class="powershell">sudo jupyter lab --ip=0.0.0.0 --port=80 --allow-root --NotebookApp.iopub_data_rate_limit=1.0e10
-sudo tensorboard --logdir logs/fit/ --port=81 --host=0.0.0.0
-sudo python3 web-server-dev.py
-sudo python3 web-server-client.py</code></pre>
+<pre><code class="powershell">sudo ./venv/bin/jupyter lab --ip=0.0.0.0 --port=80 --allow-root --NotebookApp.iopub_data_rate_limit=1.0e10
+sudo ./venv/bin/tensorboard --logdir logs/fit/ --port=81 --host=0.0.0.0
+sudo ./venv/bin/python web-server-dev.py
+sudo ./venv/bin/python web-server-client.py
+sudo ./venv/bin/python market-data.py
+sudo ./venv/bin/jupyter nbconvert --to script nq9.ipynb</code></pre>
 
 (可能有用的)依賴庫
 <pre><code class="powershell">sudo apt-get install python3.7-dev 
@@ -130,25 +145,63 @@ sudo apt-get install libsqlclient-dev
 sudo apt-get install libmysqlclient-dev
 sudo apt-get install libssl-dev</code></pre>
 
-TA-lib
+mpl_finance
 <pre><code class="powershell">pip install https://github.com/matplotlib/mpl_finance/archive/master.zip</code></pre>
 
+TA-lib
+<pre><code class="powershell">tar -xzf ta-lib-0.4.0-src.tar.gz
+cd ta-lib/
+./configure --prefix=/usr
+make
+sudo make install
+sudo apt upgrade
+pip install TA-Lib</code></pre>
+
 設置venv
-<pre><code class="powershell"># unset irrelevant variables
-deactivate nondestructive
-
-VIRTUAL_ENV="/home/user/PycharmProjects/JupyterLab01/venv"
-export VIRTUAL_ENV
-
-_OLD_VIRTUAL_PATH="$PATH"
-PATH="$VIRTUAL_ENV/bin:$PATH"
-export PATH
-
-# 設置路徑
+<pre><code class="powershell"># 設置路徑
 export PATH=/usr/local/cuda-10.2/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 # 手動鏈接庫
 sudo ln -s /usr/local/cuda-10.2/targets/x86_64-linux/lib/libcudart.so.10.2 /usr/lib/x86_64-linux-gnu/libcudart.so.10.1</code></pre>
+
+<pre><code class="powershell"># 設置路徑
+export PATH=/usr/local/cuda-11.1/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+# 手動鏈接庫
+sudo rm /usr/lib/x86_64-linux-gnu/libcusolver.so.10
+sudo ln -s /usr/local/cuda-11.1/targets/x86_64-linux/lib/libcusolver.so.11 /usr/lib/x86_64-linux-gnu/libcusolver.so.10</code></pre>
+
+查詢路徑
+<pre><code class="powershell">python3 -c "import sys; print(sys.path)"
+sudo python3 -c "import sys; print(sys.path)"</code></pre>
+
+vnc
+<pre><code class="powershell">#!/bin/bash
+xrdb $HOME/.Xresources
+vncconfig -iconic &
+autocutsel -s CLIPBOARD -fork &
+startxfce4 &</code></pre>
+
+vnc close
+<pre><code class="powershell">sudo vncserver -kill :1</code></pre>
+
+vnc start
+<pre><code class="powershell">vncserver :1</code></pre>
+
+<a target="_blank" href="https://aur.archlinux.org/packages/github-desktop-bin/">github desktop</a><br />
+<pre><code class="powershell">sudo apt install gnome-keyring
+sudo dpkg -i GitHubDesktop-linux-2.5.7-linux1.deb</code></pre>
+
+set default python3 
+<pre><code class="powershell">sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+sudo update-alternatives --config python3</code></pre>
+
+firewall
+<pre><code class="powershell">sudo ufw status
+sudo iptables -L</code></pre>
+
+terminal
+<pre><code class="powershell">sudo update-alternatives --config x-terminal-emulator</code></pre>
 
 </div>
 </div>

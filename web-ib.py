@@ -4,7 +4,9 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 import ib_insync as ib
+import pandas as pd
 import json as json
+import sqlite3 as sqlite3
 from tornado.options import define, options
 from datetime import datetime, timedelta, date
 
@@ -13,6 +15,8 @@ define("ib_port", default=4002, help="port", type=int)
 define("ib_client", default=1, help="client id", type=int)
 define("ib_timeout", default=5000, help="timeout", type=int)
 define("web_port", default=84, help="run on the given port", type=int)
+
+path_db = os.path.abspath(os.path.join('data', 'ib', 'ib.db'))
 
 conn = ib.IB()
 conn.connect(options.ib_host, port=options.ib_port, clientId=options.ib_client, timeout=options.ib_timeout)
@@ -93,6 +97,19 @@ class ListOrders(tornado.web.RequestHandler):
                 'trailStopPrice': order.trailStopPrice,
                 'parentPermId': order.parentPermId
             })
+        # save db
+        db = sqlite3.connect(path_db)
+        cursor = db.cursor()
+        df = pd.DataFrame(data=data)
+        df['trailStopPrice'] = 0.0
+        data2 = [v.values.tolist() for k, v in df.iterrows()]
+        if data2:
+            cursor.executemany("""replace into ib_order (account, permId, refFuturesConId, action, orderType, 
+            filledQuantity, lmtPrice, trailStopPrice, parentPermId) values (?, ?, ?, ?, ?, ?, ?, ?, ?)""", data2)
+        db.commit()
+        cursor.close()
+        db.close()
+        #
         self.write(json.dumps(data))
 
 
@@ -120,6 +137,25 @@ class ListTrades(tornado.web.RequestHandler):
                                          'commission': trade.fills[0].commissionReport.commission,
                                          'currency': trade.fills[0].commissionReport.currency}
                 })
+        # save db 1
+        keys2 = []
+        data2_2 = []
+        for v in data:
+            data2_1 = {}
+            for k1, v1 in v.items():
+                data2_1.update(v1)
+            data2_2.append([v3 for k3, v3 in data2_1.items()])
+            keys2 = list(data2_1.keys())
+        keys2_2 = ", ".join(keys2)
+        # save db 2
+        db = sqlite3.connect(path_db)
+        cursor = db.cursor()
+        if keys2_2 and data2_2:
+            cursor.executemany("replace into ib_trade ("+keys2_2+") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data2_2)
+        db.commit()
+        cursor.close()
+        db.close()
+        #
         self.write(json.dumps(data))
 
 
@@ -152,6 +188,7 @@ class PlaceLimitOrder(tornado.web.RequestHandler):
         else:
             order1 = ib.LimitOrder(data['side'].upper(), int(data['quantity']), int(data['price']))
             date1 = date.today().strftime('%Y%m')
+            date1 = '202103'
             future1 = ib.Future(data['symbol'], date1, data['exchange'])
             trade1 = conn.placeOrder(future1, order1)
             data = {
@@ -181,6 +218,7 @@ class PlaceMarketOrder(tornado.web.RequestHandler):
         else:
             order1 = ib.MarketOrder(data['side'].upper(), int(data['quantity']))
             date1 = date.today().strftime('%Y%m')
+            date1 = '202103'
             future1 = ib.Future(data['symbol'], date1, data['exchange'])
             trade1 = conn.placeOrder(future1, order1)
             data = {
